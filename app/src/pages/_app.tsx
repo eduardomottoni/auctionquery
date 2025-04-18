@@ -2,12 +2,26 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { ThemeProvider } from 'styled-components';
 import { Provider as ReduxProvider } from 'react-redux';
-import { store } from '@/store';
+import { useEffect } from 'react';
+import { store, loadPersistedState } from '@/store';
+import { setInitialFavorites } from '@/store/vehiclesSlice';
+import { setInitialLastSearch } from '@/store/searchSlice';
 import theme from '@/styles/theme';
 import GlobalStyles from '@/styles/GlobalStyles';
 // import { Auth0Provider } from '@auth0/nextjs-auth0'; // Renamed from UserProvider in v4, not required by default
 
-export default function App({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps }: AppProps) {
+  // Client-side state hydration
+  useEffect(() => {
+    const { favorites, lastSearch } = loadPersistedState();
+    if (favorites !== undefined) {
+      store.dispatch(setInitialFavorites(favorites));
+    }
+    if (lastSearch !== undefined) {
+      store.dispatch(setInitialLastSearch(lastSearch));
+    }
+  }, []); // Empty dependency array ensures this runs only once on mount
+
   // Add other providers (e.g., Redux, Auth0) here as needed
   return (
     <ReduxProvider store={store}>
@@ -20,3 +34,5 @@ export default function App({ Component, pageProps }: AppProps) {
     </ReduxProvider>
   );
 }
+
+export default App;

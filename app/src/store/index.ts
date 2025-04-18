@@ -4,13 +4,15 @@ import vehiclesReducer from './vehiclesSlice';
 import searchReducer from './searchSlice';
 import { throttle } from 'lodash'; // Using lodash for throttling save operations
 
-// --- Persistence Setup ---
-
+// --- Persistence Keys ---
 const FAVORITES_KEY = 'favorites';
 const LAST_SEARCH_KEY = 'lastSearch';
 
-// Function to load state from localStorage
-const loadState = () => {
+// Function to load state from localStorage (only call client-side)
+export const loadPersistedState = () => {
+  if (typeof window === 'undefined') {
+    return { favorites: undefined, lastSearch: undefined }; // Return empty on server
+  }
   try {
     const serializedFavorites = localStorage.getItem(FAVORITES_KEY);
     const serializedLastSearch = localStorage.getItem(LAST_SEARCH_KEY);
@@ -18,26 +20,18 @@ const loadState = () => {
     const favorites = serializedFavorites ? JSON.parse(serializedFavorites) : undefined;
     const lastSearch = serializedLastSearch ? JSON.parse(serializedLastSearch) : undefined;
 
-    // Return structure matching the store shape for preloadedState
-    let preloadedState = {};
-    if (favorites !== undefined) {
-        preloadedState = { ...preloadedState, vehicles: { favorites } };
-    }
-    if (lastSearch !== undefined) {
-        // Ensure lastSearch is correctly nested under the search slice
-        preloadedState = { ...preloadedState, search: { lastSearch } };
-    }
-
-    return preloadedState;
+    return { favorites, lastSearch };
 
   } catch (err) {
     console.error("Could not load state from localStorage", err);
-    return undefined; // Return undefined if loading fails
+    return { favorites: undefined, lastSearch: undefined };
   }
 };
 
-// Function to save specific parts of the state to localStorage
-const saveState = (state: RootState) => {
+// Function to save specific parts of the state to localStorage (only call client-side)
+export const savePersistedState = (state: RootState) => {
+  if (typeof window === 'undefined') return; // Don't run on server
+
   try {
     const serializedFavorites = JSON.stringify(state.vehicles.favorites);
     const serializedLastSearch = JSON.stringify(state.search.lastSearch);
@@ -48,7 +42,8 @@ const saveState = (state: RootState) => {
   }
 };
 
-const preloadedState = loadState();
+// Don't load preloadedState from localStorage directly here
+// const preloadedState = loadState();
 
 // --------------------------------------
 
@@ -58,18 +53,22 @@ export const store = configureStore({
     vehicles: vehiclesReducer,
     search: searchReducer,
   },
-  preloadedState,
+  // preloadedState: undefined, // Store starts with initial slice state
 });
 
 // --- Store Subscription for Persistence ---
-// Throttle save operations to avoid excessive localStorage writes (e.g., max once per second)
-store.subscribe(throttle(() => {
-  const state = store.getState();
-  saveState({
-      vehicles: { favorites: state.vehicles.favorites }, // Only pass relevant part
-      search: { lastSearch: state.search.lastSearch } // Only pass relevant part
-  } as RootState); // Cast to RootState, acknowledging other parts are missing
-}, 1000));
+// Only subscribe and save on the client side
+if (typeof window !== 'undefined') {
+  store.subscribe(throttle(() => {
+    const state = store.getState();
+    // Pass only the relevant parts needed for saving
+    savePersistedState({
+        auth: state.auth, // Pass auth state even if not persisting it directly
+        vehicles: { favorites: state.vehicles.favorites, allVehicles: [], status: 'idle', error: null }, // Pass only favorites for saving, fulfill interface
+        search: { lastSearch: state.search.lastSearch, filters: {}, sort: null, pagination: { page: 1, limit: 10 } } // Pass only lastSearch, fulfill interface
+    } as RootState);
+  }, 1000));
+}
 // -----------------------------------------------------
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
