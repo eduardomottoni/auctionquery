@@ -2,12 +2,13 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '.'; // Import RootState for selector typing
 import { fetchVehicles as fetchVehiclesService } from '@/services/vehicleService';
 import { createSelector } from 'reselect';
+import { Vehicle } from '@/types/vehicle'; // Import the central type definition
 
 // TODO: Define a proper Vehicle type later, perhaps in @/types
-interface Vehicle {
-  id: number | string;
-  [key: string]: any; // Placeholder for other vehicle properties
-}
+// interface Vehicle {
+//   id: number | string;
+//   [key: string]: any; // Placeholder for other vehicle properties
+// }
 
 interface VehiclesState {
   allVehicles: Vehicle[];
@@ -26,12 +27,12 @@ const initialState: VehiclesState = {
   error: null,
 };
 
-// Async thunk for fetching vehicles
-export const fetchVehicles = createAsyncThunk(
+// Async thunk for fetching vehicles - Ensure return type matches imported Vehicle
+export const fetchVehicles = createAsyncThunk<Vehicle[], void, { rejectValue: string }>(
   'vehicles/fetchVehicles',
   async (_, { rejectWithValue }) => {
     try {
-      const vehicles = await fetchVehiclesService();
+      const vehicles: Vehicle[] = await fetchVehiclesService(); // Explicitly type the result
       return vehicles;
     } catch (error) {
       if (error instanceof Error) {
@@ -78,7 +79,11 @@ const vehiclesSlice = createSlice({
       })
       .addCase(fetchVehicles.fulfilled, (state, action: PayloadAction<Vehicle[]>) => {
         state.status = 'succeeded';
-        state.allVehicles = action.payload;
+        // Assign sequential IDs to the fetched vehicles
+        state.allVehicles = action.payload.map((vehicle, index) => ({
+          ...vehicle,
+          id: `vehicle-${index}` // Create a unique string ID (e.g., "vehicle-0", "vehicle-1")
+        }));
       })
       .addCase(fetchVehicles.rejected, (state, action) => {
         state.status = 'failed';
@@ -99,7 +104,7 @@ export const {
 // --- Selectors --- 
 
 // Basic selectors
-export const selectAllVehicles = (state: RootState) => state.vehicles.allVehicles;
+export const selectAllVehicles = (state: RootState): Vehicle[] => state.vehicles.allVehicles;
 export const selectVehiclesStatus = (state: RootState) => state.vehicles.status;
 export const selectVehiclesError = (state: RootState) => state.vehicles.error;
 export const selectFavorites = (state: RootState) => state.vehicles.favorites;
@@ -112,56 +117,110 @@ const selectSearchPagination = (state: RootState) => state.search.pagination;
 // Memoized selector for filtered vehicles
 export const selectFilteredVehicles = createSelector(
   [selectAllVehicles, selectSearchFilters],
-  (vehicles, filters) => {
+  (vehicles: Vehicle[], filters): Vehicle[] => {
     if (!vehicles || vehicles.length === 0) return [];
-    if (Object.keys(filters).length === 0) return vehicles; // No filters applied
+    if (Object.keys(filters).length === 0) return vehicles;
 
-    // Basic filtering logic (extend as needed based on actual filter types)
     return vehicles.filter(vehicle => {
       return Object.entries(filters).every(([key, value]) => {
-        if (value === '' || value === null || value === undefined) return true; // Ignore empty filters
-        
-        // Basic case-insensitive string search for make/model (example)
-        if ((key === 'make' || key === 'model') && typeof value === 'string') {
-          return vehicle[key]?.toLowerCase().includes(value.toLowerCase());
+        if (value === '' || value === null || value === undefined) return true;
+
+        let vehicleValue: any;
+
+        // --- Handle Top Level Fields ---
+        if (key === 'make' || key === 'model' || key === 'engineSize' || key === 'fuel' || key === 'year' || key === 'mileage' || key === 'startingBid') {
+           if (!(key in vehicle)) return false;
+           vehicleValue = vehicle[key as keyof Vehicle];
         }
-        // Exact match for year (example)
-        if (key === 'year' && typeof value === 'number') {
-          return vehicle[key] === value;
+        // --- Handle Nested Specification Fields ---
+        else if (key === 'vehicleType' || key === 'colour' || key === 'transmission' || key === 'numberOfDoors' || key === 'co2Emissions' || key === 'noxEmissions' || key === 'numberOfKeys') {
+            if (!('specification' in vehicle.details) || !(key in vehicle.details.specification)) return false;
+            vehicleValue = vehicle.details.specification[key as keyof Vehicle['details']['specification']];
         }
-        // Range for price (example - assuming filter value is { min: number, max: number })
-        if (key === 'price' && typeof value === 'object' && value !== null) {
-          const { min, max } = value;
-          const price = vehicle.price;
-          if (min !== undefined && price < min) return false;
-          if (max !== undefined && price > max) return false;
-          return true;
+        // --- Handle Nested Ownership Fields ---
+        else if (key === 'logBook' || key === 'numberOfOwners' || key === 'dateOfRegistration') {
+            if (!('ownership' in vehicle.details) || !(key in vehicle.details.ownership)) return false;
+            vehicleValue = vehicle.details.ownership[key as keyof Vehicle['details']['ownership']];
         }
-        // Default: check if property exists and matches loosely
-        return vehicle.hasOwnProperty(key) && vehicle[key] == value;
+        // --- Handle Equipment Array --- (Example: Check if equipment includes a specific string)
+        else if (key === 'equipment' && typeof value === 'string') {
+            if (!('equipment' in vehicle.details) || !Array.isArray(vehicle.details.equipment)) return false;
+            return vehicle.details.equipment.some(equip => equip.toLowerCase().includes(value.toLowerCase()));
+        }
+         else {
+            // Unknown filter key - treat as non-match or handle differently
+            console.warn(`Unknown filter key: ${key}`);
+            return false;
+        }
+
+        // --- Perform Comparison based on type ---
+        if (typeof value === 'string' && typeof vehicleValue === 'string') {
+          return vehicleValue.toLowerCase().includes(value.toLowerCase());
+        }
+        if (typeof value === 'number' && typeof vehicleValue === 'number') {
+          // Exact match for numbers like year, numberOfDoors, numberOfOwners
+          return vehicleValue === value;
+        }
+        if (key === 'startingBid' || key === 'mileage') { // Example Range filter for bid/mileage
+            if (typeof value === 'object' && value !== null && typeof vehicleValue === 'number') {
+                const { min, max } = value as { min?: number; max?: number };
+                if (min !== undefined && vehicleValue < min) return false;
+                if (max !== undefined && vehicleValue > max) return false;
+                return true;
+            }
+        }
+        // Fallback comparison (adjust as needed)
+        return vehicleValue == value;
       });
     });
   }
 );
 
-// Memoized selector for sorted vehicles
+// Memoized selector for sorted vehicles - FIX Date comparison placement
 export const selectSortedVehicles = createSelector(
   [selectFilteredVehicles, selectSearchSort],
-  (vehicles, sort) => {
-    if (!sort) return vehicles; // No sorting applied
+  (vehicles: Vehicle[], sort): Vehicle[] => {
+    if (!sort) return vehicles;
 
-    const sortedVehicles = [...vehicles]; // Create a mutable copy
+    const sortedVehicles = [...vehicles];
     sortedVehicles.sort((a, b) => {
-      const fieldA = a[sort.field];
-      const fieldB = b[sort.field];
+        let fieldA: any;
+        let fieldB: any;
+        const sortField = sort.field;
+
+        // Access fields - Add access for dateOfRegistration
+        if (sortField === 'make' || sortField === 'model' || sortField === 'year' || sortField === 'mileage' || sortField === 'startingBid' || sortField === 'auctionDateTime') {
+            fieldA = a[sortField as keyof Vehicle];
+            fieldB = b[sortField as keyof Vehicle];
+        } else if (sortField === 'colour' || sortField === 'transmission') {
+            fieldA = a.details?.specification?.[sortField as keyof Vehicle['details']['specification']];
+            fieldB = b.details?.specification?.[sortField as keyof Vehicle['details']['specification']];
+        } else if (sortField === 'dateOfRegistration') {
+             fieldA = a.details?.ownership?.dateOfRegistration;
+             fieldB = b.details?.ownership?.dateOfRegistration;
+        } else {
+            console.warn(`Unsupported sort field: ${sortField}`);
+            return 0;
+        }
 
       let comparison = 0;
-      if (fieldA > fieldB) {
-        comparison = 1;
-      } else if (fieldA < fieldB) {
-        comparison = -1;
+      // Handle dates specifically HERE
+      if (sortField === 'auctionDateTime' || sortField === 'dateOfRegistration') {
+          // Convert to timestamp for reliable comparison, handle null/undefined
+          const timeA = fieldA ? new Date(fieldA).getTime() : (sort.direction === 'asc' ? Infinity : -Infinity); // push nulls based on direction
+          const timeB = fieldB ? new Date(fieldB).getTime() : (sort.direction === 'asc' ? Infinity : -Infinity);
+          comparison = timeA - timeB;
+      } else {
+        // General comparison (nulls/undefined handled based on direction)
+        const nullVal = sort.direction === 'asc' ? Infinity : -Infinity;
+        const valA = (fieldA === undefined || fieldA === null) ? nullVal : fieldA;
+        const valB = (fieldB === undefined || fieldB === null) ? nullVal : fieldB;
+
+        if (valA > valB) comparison = 1;
+        else if (valA < valB) comparison = -1;
       }
 
+      // Apply direction AFTER comparison is determined
       return sort.direction === 'desc' ? comparison * -1 : comparison;
     });
 
@@ -172,7 +231,7 @@ export const selectSortedVehicles = createSelector(
 // Memoized selector for paginated vehicles
 export const selectPaginatedVehicles = createSelector(
   [selectSortedVehicles, selectSearchPagination],
-  (vehicles, pagination) => {
+  (vehicles: Vehicle[], pagination): Vehicle[] => {
     const { page, limit } = pagination;
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
@@ -183,7 +242,7 @@ export const selectPaginatedVehicles = createSelector(
 // Selector for total count of filtered items (for pagination controls)
 export const selectFilteredVehiclesCount = createSelector(
   [selectFilteredVehicles],
-  (vehicles) => vehicles.length
+  (vehicles: Vehicle[]) => vehicles.length
 );
 
 export default vehiclesSlice.reducer; 

@@ -3,3 +3,5 @@ had a issue caused because the name of the folder contained capital letters
 the nextjs gives a lot of options like tailwind and turbopack
 
 have an issue implementing redux when loading the page, the client doesnt recognize local storage
+
+the vehicles had no ID, so I have to create one in order when loading it from memory, to aways have the same id

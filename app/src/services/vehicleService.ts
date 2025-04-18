@@ -1,8 +1,7 @@
+import { Vehicle } from '@/types/vehicle'; // Import the central type
+
 // TODO: Define a proper Vehicle type later, perhaps in @/types
-interface Vehicle {
-  id: number | string;
-  [key: string]: any; // Placeholder for other vehicle properties
-}
+// interface Vehicle { ... }
 
 // Base URL for fetching public data
 const BASE_URL = '/data'; // Assuming Next.js serves public dir at root
@@ -16,12 +15,13 @@ export const fetchVehicles = async (): Promise<Vehicle[]> => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const data: Vehicle[] = await response.json();
+    const data = await response.json();
     // Basic validation (optional but good practice)
     if (!Array.isArray(data)) {
         throw new Error('Fetched data is not an array');
     }
-    return data;
+    // TODO: Add validation that items in data match Vehicle structure if needed
+    return data as Vehicle[]; // Cast to ensure type alignment
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
     throw new Error('Failed to fetch vehicle data.'); // Re-throw a user-friendly error

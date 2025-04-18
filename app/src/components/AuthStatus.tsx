@@ -2,42 +2,33 @@ import React from 'react';
 import styled from 'styled-components';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/router';
+import Button from '@/components/ui/Button';
 
 const Wrapper = styled.div`
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
-  background-color: ${({ theme }) => theme.colors.secondary};
-  color: ${({ theme }) => theme.colors.textLight};
+  background-color: ${({ theme }) => theme.colors.border};
+  color: ${({ theme }) => theme.colors.secondary};
   border-radius: ${({ theme }) => theme.borderRadius.md};
-  margin: ${({ theme }) => theme.spacing.md} 0;
   font-size: ${({ theme }) => theme.typography.fontSize.sm};
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.md};
+  flex-wrap: wrap;
 `;
 
 const StatusText = styled.span`
   font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
+  min-width: 100px;
 `;
 
 const TimeText = styled.span`
   font-style: italic;
-`;
-
-const ActionButton = styled.button`
-  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
-  font-size: ${({ theme }) => theme.typography.fontSize.sm};
-  color: ${({ theme }) => theme.colors.secondary};
-  background-color: ${({ theme }) => theme.colors.textLight};
-  border: none;
-  border-radius: ${({ theme }) => theme.borderRadius.sm};
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.primary};
-    color: white;
-  }
+  white-space: nowrap;
 `;
 
 // Helper to format remaining time
@@ -61,14 +52,18 @@ const AuthStatus: React.FC = () => {
     <Wrapper>
       {isAuthenticated && token ? (
         <>
-          <StatusText>Logged In with token: {token}</StatusText>
+          <StatusText>Token: {token}</StatusText>
           <TimeText>Expires in: {formatTime(timeRemaining)}</TimeText>
-          <ActionButton onClick={logout}>Logout</ActionButton>
+          <Button onClick={logout} variant="secondary" size="sm">
+              Logout
+          </Button>
         </>
       ) : (
         <>
           <StatusText>Logged Out</StatusText>
-          <ActionButton onClick={handleLoginRedirect}>Login</ActionButton>
+          <Button onClick={handleLoginRedirect} variant="primary" size="sm">
+              Login
+          </Button>
         </>
       )}
     </Wrapper>
