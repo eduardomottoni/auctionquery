@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+// Remove direct State type imports - use RootState instead
 import authReducer from './authSlice';
 import vehiclesReducer from './vehiclesSlice';
 import searchReducer from './searchSlice';
@@ -7,24 +8,34 @@ import { throttle } from 'lodash'; // Using lodash for throttling save operation
 // --- Persistence Keys ---
 const FAVORITES_KEY = 'favorites';
 const LAST_SEARCH_KEY = 'lastSearch';
+const AUTH_KEY = 'authState'; // Key for auth state
+
+// Define the shape of the state we persist for auth
+interface PersistedAuthState {
+    token: string | null;
+    expirationTime: number | null;
+    user: { [key: string]: any } | null;
+}
 
 // Function to load state from localStorage (only call client-side)
 export const loadPersistedState = () => {
   if (typeof window === 'undefined') {
-    return { favorites: undefined, lastSearch: undefined }; // Return empty on server
+    return { favorites: undefined, lastSearch: undefined, authState: undefined }; // Return empty on server
   }
   try {
     const serializedFavorites = localStorage.getItem(FAVORITES_KEY);
     const serializedLastSearch = localStorage.getItem(LAST_SEARCH_KEY);
+    const serializedAuthState = localStorage.getItem(AUTH_KEY);
 
     const favorites = serializedFavorites ? JSON.parse(serializedFavorites) : undefined;
     const lastSearch = serializedLastSearch ? JSON.parse(serializedLastSearch) : undefined;
+    const authState: PersistedAuthState | undefined = serializedAuthState ? JSON.parse(serializedAuthState) : undefined;
 
-    return { favorites, lastSearch };
+    return { favorites, lastSearch, authState };
 
   } catch (err) {
     console.error("Could not load state from localStorage", err);
-    return { favorites: undefined, lastSearch: undefined };
+    return { favorites: undefined, lastSearch: undefined, authState: undefined };
   }
 };
 
@@ -35,8 +46,18 @@ export const savePersistedState = (state: RootState) => {
   try {
     const serializedFavorites = JSON.stringify(state.vehicles.favorites);
     const serializedLastSearch = JSON.stringify(state.search.lastSearch);
+    // Only persist necessary auth fields
+    const authToPersist: PersistedAuthState = {
+        token: state.auth.token,
+        expirationTime: state.auth.expirationTime,
+        user: state.auth.user
+    };
+    const serializedAuthState = JSON.stringify(authToPersist);
+
     localStorage.setItem(FAVORITES_KEY, serializedFavorites);
     localStorage.setItem(LAST_SEARCH_KEY, serializedLastSearch);
+    localStorage.setItem(AUTH_KEY, serializedAuthState);
+
   } catch (err) {
     console.error("Could not save state to localStorage", err);
   }
@@ -61,12 +82,8 @@ export const store = configureStore({
 if (typeof window !== 'undefined') {
   store.subscribe(throttle(() => {
     const state = store.getState();
-    // Pass only the relevant parts needed for saving
-    savePersistedState({
-        auth: state.auth, // Pass auth state even if not persisting it directly
-        vehicles: { favorites: state.vehicles.favorites, allVehicles: [], status: 'idle', error: null }, // Pass only favorites for saving, fulfill interface
-        search: { lastSearch: state.search.lastSearch, filters: {}, sort: null, pagination: { page: 1, limit: 10 } } // Pass only lastSearch, fulfill interface
-    } as RootState);
+    // Pass the whole state to savePersistedState, it will select what to save
+    savePersistedState(state);
   }, 1000));
 }
 // -----------------------------------------------------
@@ -79,4 +96,7 @@ export type AppDispatch = typeof store.dispatch;
 import { TypedUseSelectorHook, useDispatch as useReduxDispatch, useSelector as useReduxSelector } from 'react-redux';
 
 export const useDispatch: () => AppDispatch = useReduxDispatch;
-export const useSelector: TypedUseSelectorHook<RootState> = useReduxSelector; 
+export const useSelector: TypedUseSelectorHook<RootState> = useReduxSelector;
+
+// Remove conflicting re-export
+// export type { RootState, AuthState, VehiclesState, SearchState }; 

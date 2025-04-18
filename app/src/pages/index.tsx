@@ -7,12 +7,13 @@ import {
   selectAllVehicles,
   selectVehiclesStatus,
 } from '@/store/vehiclesSlice';
+import AuthStatus from '@/components/AuthStatus'; // Import the status component
 
 const StyledHeading = styled.h1`
   color: ${({ theme }) => theme.colors.primary};
   font-size: ${({ theme }) => theme.typography.fontSize.h1};
   text-align: center;
-  margin-top: ${({ theme }) => theme.spacing.xxl};
+  margin-top: ${({ theme }) => theme.spacing.md}; // Reduced margin
 `;
 
 const Container = styled.div`
@@ -46,6 +47,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Container>
+        <AuthStatus /> {/* Add the status component here */}
         <StyledHeading>Welcome to the Auction!</StyledHeading>
         <InfoText>
           Redux store configured.

@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { store, loadPersistedState } from '@/store';
 import { setInitialFavorites } from '@/store/vehiclesSlice';
 import { setInitialLastSearch } from '@/store/searchSlice';
+import { setInitialAuthState } from '@/store/authSlice';
 import theme from '@/styles/theme';
 import GlobalStyles from '@/styles/GlobalStyles';
 // import { Auth0Provider } from '@auth0/nextjs-auth0'; // Renamed from UserProvider in v4, not required by default
@@ -13,12 +14,16 @@ import GlobalStyles from '@/styles/GlobalStyles';
 function App({ Component, pageProps }: AppProps) {
   // Client-side state hydration
   useEffect(() => {
-    const { favorites, lastSearch } = loadPersistedState();
+    const { favorites, lastSearch, authState } = loadPersistedState();
     if (favorites !== undefined) {
       store.dispatch(setInitialFavorites(favorites));
     }
     if (lastSearch !== undefined) {
       store.dispatch(setInitialLastSearch(lastSearch));
+    }
+    if (authState !== undefined) {
+      // Dispatch action to set initial auth state from localStorage
+      store.dispatch(setInitialAuthState(authState));
     }
   }, []); // Empty dependency array ensures this runs only once on mount
 
