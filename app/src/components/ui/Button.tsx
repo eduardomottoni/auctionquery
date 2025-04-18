@@ -46,10 +46,11 @@ const Button = styled.button<ButtonProps>`
       case 'secondary':
         return css`
           background-color: ${theme.colors.secondary};
-          color: ${theme.colors.textLight};
+          color: ${theme.colors.buttonPrimaryText};
           border-color: ${theme.colors.secondary};
           &:hover:not(:disabled) {
             background-color: ${theme.colors.primary};
+            color: ${theme.colors.buttonPrimaryText};
             border-color: ${theme.colors.primary};
           }
         `;
@@ -76,7 +77,7 @@ const Button = styled.button<ButtonProps>`
       default:
         return css`
           background-color: ${theme.colors.primary};
-          color: ${theme.colors.textLight};
+          color: ${theme.colors.buttonPrimaryText};
           border-color: ${theme.colors.primary};
           &:hover:not(:disabled) {
             background-color: ${theme.colors.secondary};

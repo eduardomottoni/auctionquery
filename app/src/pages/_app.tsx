@@ -1,18 +1,16 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { ThemeProvider } from 'styled-components';
 import { Provider as ReduxProvider } from 'react-redux';
 import { useEffect } from 'react';
 import { store, loadPersistedState } from '@/store';
 import { setInitialFavorites } from '@/store/vehiclesSlice';
 import { setInitialLastSearch } from '@/store/searchSlice';
 import { setInitialAuthState } from '@/store/authSlice';
-import theme from '@/styles/theme';
 import GlobalStyles from '@/styles/GlobalStyles';
 import Layout from "@/components/Layout";
-// import { Auth0Provider } from '@auth0/nextjs-auth0'; // Renamed from UserProvider in v4, not required by default
+import { AppThemeProvider } from '@/context/ThemeContext';
 
-function App({ Component, pageProps }: AppProps) {
+function AuctionApp({ Component, pageProps }: AppProps) {
   // Client-side state hydration
   useEffect(() => {
     const { favorites, lastSearch, authState } = loadPersistedState();
@@ -31,16 +29,14 @@ function App({ Component, pageProps }: AppProps) {
   // Add other providers (e.g., Redux, Auth0) here as needed
   return (
     <ReduxProvider store={store}>
-      <ThemeProvider theme={theme}>
+      <AppThemeProvider>
         <GlobalStyles />
         <Layout>
-          {/* <Auth0Provider> */}
-            <Component {...pageProps} />
-          {/* </Auth0Provider> */}
+          <Component {...pageProps} />
         </Layout>
-      </ThemeProvider>
+      </AppThemeProvider>
     </ReduxProvider>
   );
 }
 
-export default App;
+export default AuctionApp;

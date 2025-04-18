@@ -33,7 +33,7 @@ const FavoriteButton = styled.button`
   color: ${({ theme }) => theme.colors.text};
 
   &.is-favorite {
-    color: #fdd835; // Yellow for favorite
+    color: ${({ theme }) => theme.colors.accent}; // Use theme accent color
   }
 
   &:hover {
@@ -179,7 +179,13 @@ const VehicleDetails: React.FC<VehicleDetailsProps> = ({ vehicle, onClose }) => 
 
       {/* Add Image Carousel */}
       <CarouselContainer>
-        <Carousel showThumbs={false} infiniteLoop useKeyboardArrows dynamicHeight>
+        <Carousel 
+          showThumbs={false} 
+          infiniteLoop 
+          useKeyboardArrows 
+          dynamicHeight
+          showArrows={true}
+        >
           <div>
             <img src="/images/placeholder.jpg" alt={`${vehicle.make} ${vehicle.model} view 1`} />
             {/* <p className="legend">Legend 1</p> */}

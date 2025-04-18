@@ -17,6 +17,7 @@ import VehicleList from '@/components/vehicles/VehicleList';
 import ViewToggle, { ViewMode } from '@/components/vehicles/ViewToggle';
 import FilterSortControls from '@/components/search/FilterSortControls';
 import Pagination from '@/components/Pagination'; // Correct path
+import ItemsPerPageSelector from '@/components/ItemsPerPageSelector'; // Import the new component
 import withAuth from '@/components/withAuth';
 import { useMediaQuery } from '@/hooks/useMediaQuery'; // Import hook
 import { media } from '@/styles/theme'; // Import media helper
@@ -36,6 +37,16 @@ const InfoText = styled.p`
   margin-top: ${({ theme }) => theme.spacing.md};
   font-size: ${({ theme }) => theme.typography.fontSize.lg};
   text-align: center;
+`;
+
+// Add a wrapper for the controls above the list/grid (can reuse name)
+const TopControlsContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; // Allow wrapping on smaller screens
+  gap: ${({ theme }) => theme.spacing.md};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
 function FavoritesPageContent() {
@@ -70,6 +81,7 @@ function FavoritesPageContent() {
 
   const handleItemsPerPageChange = (newLimit: number) => {
     dispatch(setLimit(newLimit));
+    dispatch(setPage(1)); // Reset to page 1 when limit changes
   };
 
   const renderVehicleView = () => {
@@ -103,7 +115,14 @@ function FavoritesPageContent() {
         {allFavoriteVehicles.length > 0 && (
           <>
             <FilterSortControls />
-            <ViewToggle currentView={viewMode} onViewChange={setViewMode} />
+            {/* Use the new container for ViewToggle and ItemsPerPageSelector */}
+            <TopControlsContainer>
+              <ItemsPerPageSelector
+                itemsPerPage={pagination.limit}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
+              <ViewToggle currentView={viewMode} onViewChange={setViewMode} />
+            </TopControlsContainer>
           </>
         )}
 
@@ -115,9 +134,7 @@ function FavoritesPageContent() {
                 currentPage={pagination.page}
                 totalPages={Math.ceil(totalFilteredItems / pagination.limit)}
                 totalItems={totalFilteredItems}
-                itemsPerPage={pagination.limit}
                 onPageChange={handlePageChange}
-                onItemsPerPageChange={handleItemsPerPageChange}
             />
         )}
       </Container>

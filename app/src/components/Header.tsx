@@ -3,6 +3,8 @@ import Link from 'next/link';
 import styled from 'styled-components';
 import AuthStatus from './AuthStatus';
 import { media } from '@/styles/theme'; // Import media query helper
+import { useTheme } from '@/context/ThemeContext'; // Import useTheme hook
+import Button from '@/components/ui/Button'; // Import Button
 
 const StyledHeader = styled.header`
   background-color: ${({ theme }) => theme.colors.background};
@@ -112,6 +114,7 @@ const Header: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const iconRef = useRef<HTMLDivElement>(null);
+    const { themeMode, toggleTheme } = useTheme(); // Use the theme hook
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -159,9 +162,20 @@ const Header: React.FC = () => {
           {/* Add other links here */}
         </NavLinks>
 
-        {/* Mobile Menu Icon and Auth Status pushed to the right */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: 'auto' }}>
-          <div style={{ flexShrink: 1 }}>
+        {/* Container for right-side items */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: 'auto' }}> 
+          {/* Theme Toggle Button */}
+          <Button 
+            onClick={toggleTheme} 
+            variant="ghost" 
+            size="sm" 
+            title={`Switch to ${themeMode === 'light' ? 'dark' : 'light'} mode`}
+            style={{ padding: '0.5rem' }} // Adjust padding if needed
+          >
+            {themeMode === 'light' ? '🌙' : '☀️'} {/* Moon/Sun Icon */}
+          </Button>
+
+          <div style={{ flexShrink: 1 }}> 
               <AuthStatus />
           </div>
           <MobileMenuIcon onClick={toggleMobileMenu} ref={iconRef}>

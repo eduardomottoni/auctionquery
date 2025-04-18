@@ -9,7 +9,8 @@ import Button from '@/components/ui/Button';
 import { media } from '@/styles/theme';
 
 const ControlsWrapper = styled.div`
-  background-color: ${({ theme }) => theme.colors.border};
+  background-color: ${({ theme }) => theme.colors.background};
+  border: 1px solid ${({ theme }) => theme.colors.border};
   padding: ${({ theme }) => theme.spacing.lg};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   margin-bottom: ${({ theme }) => theme.spacing.lg};

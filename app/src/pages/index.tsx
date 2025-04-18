@@ -20,6 +20,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import Button from '@/components/ui/Button';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { media } from '@/styles/theme';
+import ItemsPerPageSelector from '@/components/ItemsPerPageSelector';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.lg};
@@ -44,6 +45,15 @@ const ErrorContainer = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.md};
   margin-top: ${({ theme }) => theme.spacing.xl};
+`;
+
+const TopControlsContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spacing.md};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
 function HomePageContent() {
@@ -71,6 +81,7 @@ function HomePageContent() {
 
   const handleItemsPerPageChange = (newLimit: number) => {
     dispatch(setLimit(newLimit));
+    dispatch(setPage(1));
   };
 
   const handleRetryFetch = () => {
@@ -117,7 +128,13 @@ function HomePageContent() {
           <FilterSortControls />
         </ErrorBoundary>
 
-        <ViewToggle currentView={viewMode} onViewChange={setViewMode} />
+        <TopControlsContainer>
+          <ItemsPerPageSelector 
+            itemsPerPage={pagination.limit}
+            onItemsPerPageChange={handleItemsPerPageChange} 
+          />
+          <ViewToggle currentView={viewMode} onViewChange={setViewMode} />
+        </TopControlsContainer>
 
         <ErrorBoundary fallbackMessage="Could not display vehicles.">
           {renderVehicleView()}
@@ -128,9 +145,7 @@ function HomePageContent() {
                 currentPage={pagination.page}
                 totalPages={Math.ceil(totalFilteredItems / pagination.limit)}
                 totalItems={totalFilteredItems}
-                itemsPerPage={pagination.limit}
                 onPageChange={handlePageChange}
-                onItemsPerPageChange={handleItemsPerPageChange}
             />
         )}
       </Container>
