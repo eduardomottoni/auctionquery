@@ -10,7 +10,8 @@ import { Vehicle } from '@/types/vehicle'; // Import the central type definition
 //   [key: string]: any; // Placeholder for other vehicle properties
 // }
 
-interface VehiclesState {
+// Export the state interface
+export interface VehiclesState {
   allVehicles: Vehicle[];
   favorites: (number | string)[]; // Array of vehicle IDs
   status: 'idle' | 'loading' | 'succeeded' | 'failed';

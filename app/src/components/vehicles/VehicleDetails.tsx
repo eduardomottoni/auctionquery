@@ -5,9 +5,9 @@ import 'react-tabs/style/react-tabs.css'; // Basic styling
 import { useDispatch, useSelector } from '@/store';
 import { addFavorite, removeFavorite, selectFavorites } from '@/store/vehiclesSlice';
 import { Vehicle } from '@/types/vehicle';
-import { format } from 'date-fns'; // For date formatting
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
+import { formatDate } from '@/utils/dateUtils';
 
 // --- Styled Components for Details ---
 const DetailsContainer = styled.div`
@@ -142,14 +142,7 @@ interface VehicleDetailsProps {
 }
 
 // --- Helper Functions ---
-const formatDate = (dateString: string | undefined): string => {
-  if (!dateString) return 'N/A';
-  try {
-    return format(new Date(dateString), 'PPPppp'); // e.g., Jun 20, 2023, 4:30:00 PM
-  } catch {
-    return 'Invalid Date';
-  }
-};
+// formatDate is now imported
 
 // --- Vehicle Details Component ---
 const VehicleDetails: React.FC<VehicleDetailsProps> = ({ vehicle, onClose }) => {

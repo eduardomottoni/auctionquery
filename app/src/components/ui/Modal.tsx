@@ -98,10 +98,15 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
 
   // Use createPortal to render the modal outside the main component hierarchy
   return ReactDOM.createPortal(
-    <ModalOverlay onClick={handleOverlayClick}>
-      <ModalContent ref={modalRef}>
+    <ModalOverlay onClick={handleOverlayClick} data-testid="modal-overlay">
+      <ModalContent 
+        ref={modalRef} 
+        role="dialog" 
+        aria-modal="true" 
+        aria-labelledby={title ? "modal-title" : undefined}
+      >
         <CloseButton onClick={onClose} aria-label="Close modal">&times;</CloseButton>
-        {title && <h2>{title}</h2>} {/* Optional title */}
+        {title && <h2 id="modal-title">{title}</h2>}
         {children}
       </ModalContent>
     </ModalOverlay>,
