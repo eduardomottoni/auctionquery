@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from '@/store';
 import { setFilters, setSort, setLastSearch } from '@/store/searchSlice';
 import { RootState } from '@/store';
 import Button from '@/components/ui/Button';
+import { media } from '@/styles/theme';
 
 const ControlsWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.border};
@@ -19,7 +20,15 @@ const StyledForm = styled(Form)`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: ${({ theme }) => theme.spacing.md};
-  align-items: flex-end; // Align items to bottom for button alignment
+  align-items: flex-end;
+
+  ${({ theme }) => media.down('sm')} { // Target small screens
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); // Allow slightly smaller columns
+  }
+
+  ${({ theme }) => media.down('xs')} { // Target extra-small screens (adjust breakpoint if needed)
+      grid-template-columns: 1fr; // Stack everything into one column
+  }
 `;
 
 const FormGroup = styled.div`
@@ -65,11 +74,17 @@ const ErrorText = styled.div`
 `;
 
 const ButtonGroup = styled.div`
-    grid-column: 1 / -1; // Span across all columns
+    grid-column: 1 / -1; 
     display: flex;
     justify-content: flex-end;
     gap: ${({ theme }) => theme.spacing.md};
     margin-top: ${({ theme }) => theme.spacing.md};
+
+    ${({ theme }) => media.down('xs')} { // Stack buttons on extra-small screens
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
+    }
 `;
 
 // Validation Schema
@@ -177,14 +192,16 @@ const FilterSortControls: React.FC = () => {
             </FormGroup>
 
             <FormGroup>
-                <Label htmlFor="sortControl">Sort By</Label>
+                <Label htmlFor="sortControl" id="sortByLabel">Sort By</Label>
+                {/* eslint-disable-next-line jsx-a11y/no-onchange -- Linter cannot link label correctly */}
                 <Select
                     id="sortControl"
                     name="sort"
                     as="select"
                     value={currentSortValue}
                     onChange={handleSortChange}
-                    aria-label="Sort vehicles by"
+                    aria-labelledby="sortByLabel"
+                    title="Sort vehicles by"
                 >
                     {sortOptions.map(option => (
                         <option key={option.value} value={option.value}>

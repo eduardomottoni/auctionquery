@@ -37,8 +37,8 @@ const Pagination: React.FC<PaginationProps> = ({
 
   // Basic pagination logic (can be enhanced with page number links)
   return (
-    <div className="flex items-center justify-between mt-4">
-      <div>
+    <div className="flex items-center justify-between flex-wrap gap-y-2 mt-4">
+      <div className="hidden sm:block">
         <span className="text-sm text-gray-700">
           Showing{' '}
           <span className="font-semibold text-gray-900">

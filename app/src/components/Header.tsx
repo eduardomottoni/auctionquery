@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import styled from 'styled-components';
 import AuthStatus from './AuthStatus';
@@ -52,21 +52,97 @@ const MobileMenuIcon = styled.div`
   display: none; // Hidden by default
   cursor: pointer;
   font-size: 1.5rem; // Example size
+  z-index: 1100; // Ensure icon is above overlay
+  position: relative; // Needed for z-index
 
   ${media.down('sm')} { // Show only on small screens
     display: block;
   }
 `;
 
-// TODO: Implement mobile menu logic if needed
-// const MobileMenu = styled.div` ... `;
+// --- Mobile Menu Components ---
+const MenuOverlay = styled.div<{ isOpen: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1050; // Below drawer, above content
+  opacity: ${({ isOpen }) => (isOpen ? 1 : 0)};
+  visibility: ${({ isOpen }) => (isOpen ? 'visible' : 'hidden')};
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  ${media.up('sm')} { // Hide overlay on larger screens
+      display: none;
+  }
+`;
+
+const MobileMenuDrawer = styled.div<{ isOpen: boolean }>`
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 250px; // Adjust width as needed
+  background-color: ${({ theme }) => theme.colors.background};
+  box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+  padding: ${({ theme }) => theme.spacing.lg};
+  padding-top: 60px; // Space for header/close button
+  transform: ${({ isOpen }) => (isOpen ? 'translateX(0)' : 'translateX(100%)')};
+  transition: transform 0.3s ease-in-out;
+  z-index: 1100; // Above overlay
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.md};
+
+  ${media.up('sm')} { // Hide drawer on larger screens
+      display: none;
+  }
+
+  // Style links inside the drawer
+  ${NavLink} {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: ${({ theme }) => theme.spacing.md};
+  }
+`;
 
 const Header: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+    const iconRef = useRef<HTMLDivElement>(null);
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
     };
+
+    const closeMobileMenu = () => {
+        setIsMobileMenuOpen(false);
+    };
+
+    // Close menu if clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            // Check if click is outside menu and icon
+            if (
+                menuRef.current && !menuRef.current.contains(event.target as Node) &&
+                iconRef.current && !iconRef.current.contains(event.target as Node)
+             ) {
+                closeMobileMenu();
+            }
+        };
+
+        if (isMobileMenuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isMobileMenuOpen]);
 
   return (
     <StyledHeader>
@@ -83,16 +159,27 @@ const Header: React.FC = () => {
           {/* Add other links here */}
         </NavLinks>
 
-        {/* Placeholder for mobile menu - replace with actual icon/button */}
-        <MobileMenuIcon onClick={toggleMobileMenu}>☰</MobileMenuIcon>
-
-        {/* Auth Status fits well here */}
-        <div style={{ minWidth: '250px' }}> {/* Give AuthStatus some space */}
-            <AuthStatus />
+        {/* Mobile Menu Icon and Auth Status pushed to the right */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: 'auto' }}>
+          <div style={{ flexShrink: 1 }}>
+              <AuthStatus />
+          </div>
+          <MobileMenuIcon onClick={toggleMobileMenu} ref={iconRef}>
+              {isMobileMenuOpen ? '✕' : '☰'} {/* Change icon when open */}
+          </MobileMenuIcon>
         </div>
       </NavContainer>
-      {/* TODO: Render actual MobileMenu based on isMobileMenuOpen state */}
-      {/* {isMobileMenuOpen && <MobileMenu>...</MobileMenu>} */}
+
+      {/* Mobile Menu Implementation */}
+      <MenuOverlay isOpen={isMobileMenuOpen} onClick={closeMobileMenu} />
+      <MobileMenuDrawer isOpen={isMobileMenuOpen} ref={menuRef}>
+        {/* Add links - use onClick to close menu after navigation */}
+        <NavLink href="/" onClick={closeMobileMenu}>Home</NavLink>
+        <NavLink href="/favorites" onClick={closeMobileMenu}>Favorites</NavLink>
+        <NavLink href="/protected" onClick={closeMobileMenu}>Protected</NavLink>
+        <NavLink href="/invalid-page" onClick={closeMobileMenu}>404 Test</NavLink>
+        {/* Maybe add AuthStatus or Logout here too? */}
+      </MobileMenuDrawer>
     </StyledHeader>
   );
 };

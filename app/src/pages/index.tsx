@@ -18,6 +18,8 @@ import Pagination from '@/components/Pagination';
 import withAuth from '@/components/withAuth';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Button from '@/components/ui/Button';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { media } from '@/styles/theme';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.lg};
@@ -51,6 +53,13 @@ function HomePageContent() {
   const pagination = useSelector((state: RootState) => state.search.pagination);
   const totalFilteredItems = useSelector(selectFilteredVehiclesCount);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const isSmallScreen = useMediaQuery(media.down('sm'));
+
+  useEffect(() => {
+    if (isSmallScreen && viewMode === 'list') {
+      setViewMode('grid');
+    }
+  }, [isSmallScreen, viewMode]);
 
   useEffect(() => {
     dispatch(fetchVehicles());
@@ -86,7 +95,8 @@ function HomePageContent() {
         if (vehicles.length === 0) {
             return <InfoText>No vehicles match the current criteria.</InfoText>;
         }
-      return viewMode === 'grid'
+      const effectiveViewMode = isSmallScreen ? 'grid' : viewMode;
+      return effectiveViewMode === 'grid'
         ? <VehicleGrid vehicles={vehicles} />
         : <VehicleList vehicles={vehicles} />;
     }
