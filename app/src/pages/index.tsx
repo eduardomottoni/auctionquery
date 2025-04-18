@@ -3,11 +3,10 @@ import styled from 'styled-components';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from '@/store'; // Use typed hooks
 import {
-  setVehiclesSucceeded,
-  addFavorite,
-  selectFavorites,
+  fetchVehicles, // Import the async thunk
+  selectAllVehicles,
+  selectVehiclesStatus,
 } from '@/store/vehiclesSlice';
-import { RootState } from '@/store'; // Import RootState
 
 const StyledHeading = styled.h1`
   color: ${({ theme }) => theme.colors.primary};
@@ -18,7 +17,7 @@ const StyledHeading = styled.h1`
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.lg};
-  text-align: center; // Center text for validation
+  text-align: center;
 `;
 
 const InfoText = styled.p`
@@ -26,23 +25,18 @@ const InfoText = styled.p`
   font-size: ${({ theme }) => theme.typography.fontSize.lg};
 `;
 
-// Sample vehicle data for validation
-const sampleVehicles = [
-  { id: 1, make: 'Toyota', model: 'Camry', year: 2022, price: 25000 },
-  { id: 2, make: 'Honda', model: 'Civic', year: 2023, price: 23000 },
-  { id: 3, make: 'Ford', model: 'Mustang', year: 2021, price: 35000 },
-];
-
 export default function Home() {
   const dispatch = useDispatch();
-  const favorites = useSelector(selectFavorites);
-  const allVehiclesCount = useSelector((state: RootState) => state.vehicles.allVehicles.length);
+  const allVehicles = useSelector(selectAllVehicles);
+  const vehiclesStatus = useSelector(selectVehiclesStatus);
 
-  // Dispatch actions on component mount for validation
+  // Fetch vehicles data on component mount
   useEffect(() => {
-    dispatch(setVehiclesSucceeded(sampleVehicles));
-    dispatch(addFavorite(2)); // Favorite the Honda Civic
-  }, [dispatch]);
+    // Only fetch if vehicles haven't been loaded yet
+    if (vehiclesStatus === 'idle') {
+      dispatch(fetchVehicles());
+    }
+  }, [dispatch, vehiclesStatus]);
 
   return (
     <>
@@ -56,12 +50,15 @@ export default function Home() {
         <InfoText>
           Redux store configured.
         </InfoText>
-        <InfoText>
-          Total Vehicles Loaded: {allVehiclesCount}
-        </InfoText>
-        <InfoText>
-          Favorite Vehicle IDs: {JSON.stringify(favorites)}
-        </InfoText>
+        {vehiclesStatus === 'loading' && <InfoText>Loading vehicles...</InfoText>}
+        {vehiclesStatus === 'succeeded' && (
+          <InfoText>
+            Total Vehicles Loaded: {allVehicles.length}
+          </InfoText>
+        )}
+        {vehiclesStatus === 'failed' && (
+            <InfoText style={{ color: 'red' }}>Error loading vehicles.</InfoText>
+        )}
         <InfoText>
           (Check localStorage for 'favorites' and 'lastSearch' keys)
         </InfoText>

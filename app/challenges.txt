@@ -1,0 +1,5 @@
+had a issue caused because the name of the folder contained capital letters
+
+the nextjs gives a lot of options like tailwind and turbopack
+
+have an issue implementing redux when loading the page, the client doesnt recognize local storage
