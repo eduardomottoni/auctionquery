@@ -83,7 +83,8 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle }) => {
   const isFavorite = favorites.includes(vehicle.id);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleToggleFavorite = () => {
+  const handleToggleFavorite = (event: React.MouseEvent) => {
+    event.stopPropagation();
     if (isFavorite) {
       dispatch(removeFavorite(vehicle.id));
     } else {

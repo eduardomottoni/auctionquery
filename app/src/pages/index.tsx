@@ -16,6 +16,8 @@ import ViewToggle, { ViewMode } from '@/components/vehicles/ViewToggle';
 import FilterSortControls from '@/components/search/FilterSortControls';
 import Pagination from '@/components/Pagination';
 import withAuth from '@/components/withAuth';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import Button from '@/components/ui/Button';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.lg};
@@ -32,6 +34,14 @@ const InfoText = styled.p`
   margin-top: ${({ theme }) => theme.spacing.md};
   font-size: ${({ theme }) => theme.typography.fontSize.lg};
   text-align: center;
+`;
+
+const ErrorContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  margin-top: ${({ theme }) => theme.spacing.xl};
 `;
 
 function HomePageContent() {
@@ -54,12 +64,23 @@ function HomePageContent() {
     dispatch(setLimit(newLimit));
   };
 
+  const handleRetryFetch = () => {
+    dispatch(fetchVehicles());
+  };
+
   const renderVehicleView = () => {
     if (vehiclesStatus === 'loading') {
       return <InfoText>Loading vehicles...</InfoText>;
     }
     if (vehiclesStatus === 'failed') {
-        return <InfoText style={{ color: 'red' }}>Error loading vehicles.</InfoText>;
+      return (
+        <ErrorContainer>
+            <InfoText style={{ color: 'red' }}>Error loading vehicles.</InfoText>
+            <Button onClick={handleRetryFetch} variant="primary" size="md">
+                Retry
+            </Button>
+        </ErrorContainer>
+      );
     }
     if (vehiclesStatus === 'succeeded') {
         if (vehicles.length === 0) {
@@ -82,11 +103,15 @@ function HomePageContent() {
       <Container>
         <StyledHeading>Available Vehicles</StyledHeading>
 
-        <FilterSortControls />
+        <ErrorBoundary fallbackMessage="Could not load filter/sort controls.">
+          <FilterSortControls />
+        </ErrorBoundary>
 
         <ViewToggle currentView={viewMode} onViewChange={setViewMode} />
 
-        {renderVehicleView()}
+        <ErrorBoundary fallbackMessage="Could not display vehicles.">
+          {renderVehicleView()}
+        </ErrorBoundary>
 
         {vehiclesStatus === 'succeeded' && totalFilteredItems > 0 && (
             <Pagination

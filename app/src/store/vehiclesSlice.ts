@@ -245,4 +245,141 @@ export const selectFilteredVehiclesCount = createSelector(
   (vehicles: Vehicle[]) => vehicles.length
 );
 
-export default vehiclesSlice.reducer; 
+export default vehiclesSlice.reducer;
+
+// --- Selectors for Favorites Page ---
+
+// Memoized selector to get the full vehicle objects for favorite IDs
+export const selectFavoriteVehicles = createSelector(
+  [selectAllVehicles, selectFavorites],
+  (allVehicles, favoriteIds): Vehicle[] => {
+    const favoriteMap = new Set(favoriteIds);
+    return allVehicles.filter(vehicle => favoriteMap.has(vehicle.id));
+  }
+);
+
+// Memoized selector for filtered favorite vehicles
+// Reuses the same filtering logic as selectFilteredVehicles but applies it to favorites
+export const selectFilteredFavoriteVehicles = createSelector(
+  [selectFavoriteVehicles, selectSearchFilters],
+  (favoriteVehicles: Vehicle[], filters): Vehicle[] => {
+    if (Object.keys(filters).length === 0) return favoriteVehicles;
+
+    // Apply the same filter logic used in selectFilteredVehicles
+    return favoriteVehicles.filter(vehicle => {
+      // (Copy the filtering logic from selectFilteredVehicles here)
+       return Object.entries(filters).every(([key, value]) => {
+        if (value === '' || value === null || value === undefined) return true;
+
+        let vehicleValue: any;
+
+        // --- Handle Top Level Fields ---
+        if (key === 'make' || key === 'model' || key === 'engineSize' || key === 'fuel' || key === 'year' || key === 'mileage' || key === 'startingBid') {
+           if (!(key in vehicle)) return false;
+           vehicleValue = vehicle[key as keyof Vehicle];
+        }
+        // --- Handle Nested Specification Fields ---
+        else if (key === 'vehicleType' || key === 'colour' || key === 'transmission' || key === 'numberOfDoors' || key === 'co2Emissions' || key === 'noxEmissions' || key === 'numberOfKeys') {
+            if (!('specification' in vehicle.details) || !(key in vehicle.details.specification)) return false;
+            vehicleValue = vehicle.details.specification[key as keyof Vehicle['details']['specification']];
+        }
+        // --- Handle Nested Ownership Fields ---
+        else if (key === 'logBook' || key === 'numberOfOwners' || key === 'dateOfRegistration') {
+            if (!('ownership' in vehicle.details) || !(key in vehicle.details.ownership)) return false;
+            vehicleValue = vehicle.details.ownership[key as keyof Vehicle['details']['ownership']];
+        }
+        // --- Handle Equipment Array ---
+        else if (key === 'equipment' && typeof value === 'string') {
+            if (!('equipment' in vehicle.details) || !Array.isArray(vehicle.details.equipment)) return false;
+            return vehicle.details.equipment.some(equip => equip.toLowerCase().includes(value.toLowerCase()));
+        }
+         else {
+            console.warn(`Unknown filter key: ${key}`);
+            return false;
+        }
+
+        // --- Perform Comparison based on type ---
+        if (typeof value === 'string' && typeof vehicleValue === 'string') {
+          return vehicleValue.toLowerCase().includes(value.toLowerCase());
+        }
+        if (typeof value === 'number' && typeof vehicleValue === 'number') {
+          return vehicleValue === value;
+        }
+        if (key === 'startingBid' || key === 'mileage') { // Range filter
+            if (typeof value === 'object' && value !== null && typeof vehicleValue === 'number') {
+                const { min, max } = value as { min?: number; max?: number };
+                if (min !== undefined && vehicleValue < min) return false;
+                if (max !== undefined && vehicleValue > max) return false;
+                return true;
+            }
+        }
+        return vehicleValue == value;
+      });
+    });
+  }
+);
+
+// Memoized selector for sorted favorite vehicles
+// Reuses the same sorting logic as selectSortedVehicles but applies it to filtered favorites
+export const selectSortedFavoriteVehicles = createSelector(
+  [selectFilteredFavoriteVehicles, selectSearchSort],
+  (filteredFavoriteVehicles: Vehicle[], sort): Vehicle[] => {
+    if (!sort) return filteredFavoriteVehicles;
+
+    // Apply the same sort logic used in selectSortedVehicles
+    const sortedVehicles = [...filteredFavoriteVehicles];
+    sortedVehicles.sort((a, b) => {
+      // (Copy the sorting logic from selectSortedVehicles here)
+        let fieldA: any;
+        let fieldB: any;
+        const sortField = sort.field;
+
+        if (sortField === 'make' || sortField === 'model' || sortField === 'year' || sortField === 'mileage' || sortField === 'startingBid' || sortField === 'auctionDateTime') {
+            fieldA = a[sortField as keyof Vehicle];
+            fieldB = b[sortField as keyof Vehicle];
+        } else if (sortField === 'colour' || sortField === 'transmission') {
+            fieldA = a.details?.specification?.[sortField as keyof Vehicle['details']['specification']];
+            fieldB = b.details?.specification?.[sortField as keyof Vehicle['details']['specification']];
+        } else if (sortField === 'dateOfRegistration') {
+             fieldA = a.details?.ownership?.dateOfRegistration;
+             fieldB = b.details?.ownership?.dateOfRegistration;
+        } else {
+            console.warn(`Unsupported sort field: ${sortField}`);
+            return 0;
+        }
+
+      let comparison = 0;
+      if (sortField === 'auctionDateTime' || sortField === 'dateOfRegistration') {
+          const timeA = fieldA ? new Date(fieldA).getTime() : (sort.direction === 'asc' ? Infinity : -Infinity);
+          const timeB = fieldB ? new Date(fieldB).getTime() : (sort.direction === 'asc' ? Infinity : -Infinity);
+          comparison = timeA - timeB;
+      } else {
+        const nullVal = sort.direction === 'asc' ? Infinity : -Infinity;
+        const valA = (fieldA === undefined || fieldA === null) ? nullVal : fieldA;
+        const valB = (fieldB === undefined || fieldB === null) ? nullVal : fieldB;
+
+        if (valA > valB) comparison = 1;
+        else if (valA < valB) comparison = -1;
+      }
+      return sort.direction === 'desc' ? comparison * -1 : comparison;
+    });
+    return sortedVehicles;
+  }
+);
+
+// Selector for the total count of *filtered* favorite vehicles
+export const selectFilteredFavoriteVehiclesCount = createSelector(
+  [selectFilteredFavoriteVehicles],
+  (vehicles: Vehicle[]) => vehicles.length
+);
+
+// Selector for paginated favorite vehicles
+export const selectPaginatedFavoriteVehicles = createSelector(
+  [selectSortedFavoriteVehicles, selectSearchPagination],
+  (vehicles: Vehicle[], pagination): Vehicle[] => {
+    const { page, limit } = pagination;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    return vehicles.slice(startIndex, endIndex);
+  }
+); 

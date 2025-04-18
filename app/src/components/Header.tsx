@@ -77,7 +77,9 @@ const Header: React.FC = () => {
 
         <NavLinks>
           <NavLink href="/">Home</NavLink>
+          <NavLink href="/favorites">Favorites</NavLink>
           <NavLink href="/protected">Protected</NavLink>
+          <NavLink href="/invalid-page">404 Test</NavLink>
           {/* Add other links here */}
         </NavLinks>
 
