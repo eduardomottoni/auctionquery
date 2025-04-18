@@ -39,16 +39,16 @@ const ViewToggle: React.FC<ViewToggleProps> = ({ currentView, onViewChange }) =>
       </Button>
       {/* Wrap List button */}
       <ListButtonWrapper>
-        <Button
-          variant={currentView === 'list' ? 'primary' : 'ghost'}
-          size="sm"
-          onClick={() => onViewChange('list')}
-          aria-label="List view"
-          aria-pressed={currentView === 'list'}
-        >
-          {/* You can replace text with icons */}
-          List
-        </Button>
+      <Button
+        variant={currentView === 'list' ? 'primary' : 'ghost'}
+        size="sm"
+        onClick={() => onViewChange('list')}
+        aria-label="List view"
+        aria-pressed={currentView === 'list'}
+      >
+        {/* You can replace text with icons */}
+        List
+      </Button>
       </ListButtonWrapper>
     </ToggleContainer>
   );

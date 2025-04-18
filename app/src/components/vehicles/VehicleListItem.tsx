@@ -150,37 +150,37 @@ const VehicleListItem: React.FC<VehicleListItemProps> = ({ vehicle, style }) => 
   return (
     <>
       <ListItemWrapper style={style} onClick={handleItemClick}>
-        <ImageContainer>
+      <ImageContainer>
           <ListItemImage src={'/images/placeholder.jpg'} alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} />
-        </ImageContainer>
+      </ImageContainer>
 
-        <ContentContainer>
-          <Title>{vehicle.year} {vehicle.make} {vehicle.model}</Title>
-          <DetailsGrid>
-            <DetailItem>Type: {vehicle.details.specification.vehicleType}</DetailItem>
-            <DetailItem>Colour: {vehicle.details.specification.colour}</DetailItem>
-            <DetailItem>Mileage: {vehicle.mileage?.toLocaleString() || 'N/A'}</DetailItem>
-            <DetailItem>Fuel: {vehicle.details.specification.fuel}</DetailItem>
-            <DetailItem>Transmission: {vehicle.details.specification.transmission}</DetailItem>
-            <DetailItem>Doors: {vehicle.details.specification.numberOfDoors}</DetailItem>
-            <DetailItem>Owners: {vehicle.details.ownership.numberOfOwners}</DetailItem>
-          </DetailsGrid>
-        </ContentContainer>
+      <ContentContainer>
+        <Title>{vehicle.year} {vehicle.make} {vehicle.model}</Title>
+        <DetailsGrid>
+          <DetailItem>Type: {vehicle.details.specification.vehicleType}</DetailItem>
+          <DetailItem>Colour: {vehicle.details.specification.colour}</DetailItem>
+          <DetailItem>Mileage: {vehicle.mileage?.toLocaleString() || 'N/A'}</DetailItem>
+          <DetailItem>Fuel: {vehicle.details.specification.fuel}</DetailItem>
+          <DetailItem>Transmission: {vehicle.details.specification.transmission}</DetailItem>
+          <DetailItem>Doors: {vehicle.details.specification.numberOfDoors}</DetailItem>
+          <DetailItem>Owners: {vehicle.details.ownership.numberOfOwners}</DetailItem>
+        </DetailsGrid>
+      </ContentContainer>
 
-        <ActionsContainer>
-          <div>
-            <Price>Bid: ${vehicle.startingBid?.toLocaleString() || 'N/A'}</Price>
-            <AuctionTime>Auction: {new Date(vehicle.auctionDateTime).toLocaleString() || 'N/A'}</AuctionTime>
-          </div>
-          <Button
-            variant={isFavorite ? 'secondary' : 'outline'}
-            size="sm"
-            onClick={handleToggleFavorite}
-          >
-            {isFavorite ? 'Unfav' : 'Fav'} ⭐
-          </Button>
-        </ActionsContainer>
-      </ListItemWrapper>
+      <ActionsContainer>
+        <div>
+          <Price>Bid: ${vehicle.startingBid?.toLocaleString() || 'N/A'}</Price>
+          <AuctionTime>Auction: {new Date(vehicle.auctionDateTime).toLocaleString() || 'N/A'}</AuctionTime>
+        </div>
+        <Button
+          variant={isFavorite ? 'secondary' : 'outline'}
+          size="sm"
+          onClick={handleToggleFavorite}
+        >
+          {isFavorite ? 'Unfav' : 'Fav'} ⭐
+        </Button>
+      </ActionsContainer>
+    </ListItemWrapper>
 
       <Modal isOpen={isModalOpen} onClose={closeModal} title={`${vehicle.make} ${vehicle.model} Details`}>
         <VehicleDetails vehicle={vehicle} onClose={closeModal} />

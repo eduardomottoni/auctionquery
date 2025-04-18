@@ -11,7 +11,7 @@ interface PaginationProps {
 
 const ITEMS_PER_PAGE_OPTIONS = [10, 50, 100];
 
-const Pagination: React.FC<PaginationProps> = ({
+const Pagination: React.FC<PaginationProps> = React.memo(({
   currentPage,
   totalPages,
   onPageChange,
@@ -85,6 +85,6 @@ const Pagination: React.FC<PaginationProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default Pagination; 

@@ -76,7 +76,7 @@ const formatDateShort = (dateString: string | undefined): string => {
   }
 };
 
-const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle }) => {
+const VehicleCard: React.FC<VehicleCardProps> = React.memo(({ vehicle }) => {
   const dispatch = useDispatch();
   const favorites = useSelector(selectFavorites);
   // Use Redux state for favorite status, ignore vehicle.favourite from data source
@@ -137,6 +137,6 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle }) => {
       </Modal>
     </>
   );
-};
+});
 
 export default VehicleCard; 
