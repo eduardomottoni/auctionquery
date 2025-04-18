@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from '@/store';
 import { addFavorite, removeFavorite, selectFavorites } from '@/store/vehiclesSlice';
 import { Vehicle } from '@/types/vehicle';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Modal from '@/components/ui/Modal';
+import VehicleDetails from './VehicleDetails';
+import { format } from 'date-fns';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -64,12 +67,21 @@ const AuctionTime = styled.span`
     font-style: italic;
 `;
 
+const formatDateShort = (dateString: string | undefined): string => {
+  if (!dateString) return 'N/A';
+  try {
+    return format(new Date(dateString), 'PPp'); // e.g., Jun 20, 2023, 4:30 PM
+  } catch {
+    return 'Invalid Date';
+  }
+};
 
 const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle }) => {
   const dispatch = useDispatch();
   const favorites = useSelector(selectFavorites);
   // Use Redux state for favorite status, ignore vehicle.favourite from data source
   const isFavorite = favorites.includes(vehicle.id);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleToggleFavorite = () => {
     if (isFavorite) {
@@ -79,36 +91,50 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle }) => {
     }
   };
 
+  const handleCardClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   // Use the specific placeholder image path
   const imageUrl = `/images/placeholder.jpg`;
 
   return (
-    <StyledCard>
-      <CardImage src={imageUrl} alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} />
-      <CardContent>
-        <CardTitle>{vehicle.year} {vehicle.make} {vehicle.model}</CardTitle>
-        {/* Access nested properties */}
-        <CardDetail>Type: {vehicle.details.specification.vehicleType}</CardDetail>
-        <CardDetail>Colour: {vehicle.details.specification.colour}</CardDetail>
-        <CardDetail>Mileage: {vehicle.mileage?.toLocaleString() || 'N/A'} miles</CardDetail>
-        <CardDetail>Fuel: {vehicle.details.specification.fuel}</CardDetail>
-        <CardDetail>Transmission: {vehicle.details.specification.transmission}</CardDetail>
-        {/* Display startingBid as price */}
-        <CardPrice>Starting Bid: ${vehicle.startingBid?.toLocaleString() || 'N/A'}</CardPrice>
-      </CardContent>
-      <CardActions>
-        <AuctionTime>
-          Auction: {new Date(vehicle.auctionDateTime).toLocaleString() || 'N/A'}
-        </AuctionTime>
-        <Button
-          variant={isFavorite ? 'secondary' : 'outline'}
-          size="sm"
-          onClick={handleToggleFavorite}
-        >
-          {isFavorite ? 'Unfavorite' : 'Favorite'} ⭐
-        </Button>
-      </CardActions>
-    </StyledCard>
+    <>
+      <StyledCard onClick={handleCardClick}>
+        <CardImage src={imageUrl} alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} />
+        <CardContent>
+          <CardTitle>{vehicle.year} {vehicle.make} {vehicle.model}</CardTitle>
+          {/* Access nested properties */}
+          <CardDetail>Type: {vehicle.details.specification.vehicleType}</CardDetail>
+          <CardDetail>Colour: {vehicle.details.specification.colour}</CardDetail>
+          <CardDetail>Mileage: {vehicle.mileage?.toLocaleString() || 'N/A'} miles</CardDetail>
+          <CardDetail>Fuel: {vehicle.details.specification.fuel}</CardDetail>
+          <CardDetail>Transmission: {vehicle.details.specification.transmission}</CardDetail>
+          {/* Display startingBid as price */}
+          <CardPrice>Starting Bid: ${vehicle.startingBid?.toLocaleString() || 'N/A'}</CardPrice>
+        </CardContent>
+        <CardActions>
+          <AuctionTime>
+            Auction: {formatDateShort(vehicle.auctionDateTime)}
+          </AuctionTime>
+          <Button
+            variant={isFavorite ? 'secondary' : 'outline'}
+            size="sm"
+            onClick={handleToggleFavorite}
+          >
+            {isFavorite ? 'Unfavorite' : 'Favorite'} ⭐
+          </Button>
+        </CardActions>
+      </StyledCard>
+
+      <Modal isOpen={isModalOpen} onClose={closeModal} title={`${vehicle.make} ${vehicle.model} Details`}>
+        <VehicleDetails vehicle={vehicle} onClose={closeModal} />
+      </Modal>
+    </>
   );
 };
 

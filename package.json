@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "@types/react-window": "^1.8.8",
-    "react-window": "^1.8.11"
-  }
-}
