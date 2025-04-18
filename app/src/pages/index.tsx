@@ -8,13 +8,13 @@ import {
   selectVehiclesStatus,
   selectFilteredVehiclesCount,
 } from '@/store/vehiclesSlice';
-import { setPage } from '@/store/searchSlice';
+import { setPage, setLimit } from '@/store/searchSlice';
 import { RootState } from '@/store';
 import VehicleGrid from '@/components/vehicles/VehicleGrid';
 import VehicleList from '@/components/vehicles/VehicleList';
 import ViewToggle, { ViewMode } from '@/components/vehicles/ViewToggle';
 import FilterSortControls from '@/components/search/FilterSortControls';
-import Pagination from '@/components/ui/Pagination';
+import Pagination from '@/components/Pagination';
 import withAuth from '@/components/withAuth';
 
 const Container = styled.div`
@@ -43,13 +43,15 @@ function HomePageContent() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   useEffect(() => {
-    if (vehiclesStatus === 'idle') {
-      dispatch(fetchVehicles());
-    }
-  }, [dispatch, vehiclesStatus]);
+    dispatch(fetchVehicles());
+  }, [dispatch, pagination.page, pagination.limit]);
 
   const handlePageChange = (newPage: number) => {
     dispatch(setPage(newPage));
+  };
+
+  const handleItemsPerPageChange = (newLimit: number) => {
+    dispatch(setLimit(newLimit));
   };
 
   const renderVehicleView = () => {
@@ -86,18 +88,16 @@ function HomePageContent() {
 
         {renderVehicleView()}
 
-        {vehiclesStatus === 'succeeded' && totalFilteredItems > pagination.limit && (
+        {vehiclesStatus === 'succeeded' && totalFilteredItems > 0 && (
             <Pagination
                 currentPage={pagination.page}
+                totalPages={Math.ceil(totalFilteredItems / pagination.limit)}
                 totalItems={totalFilteredItems}
                 itemsPerPage={pagination.limit}
                 onPageChange={handlePageChange}
+                onItemsPerPageChange={handleItemsPerPageChange}
             />
         )}
-
-        <InfoText style={{ marginTop: '2rem' }}>
-          (Check localStorage for persisted state keys)
-        </InfoText>
       </Container>
     </>
   );

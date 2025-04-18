@@ -5,39 +5,51 @@ import { addFavorite, removeFavorite, selectFavorites } from '@/store/vehiclesSl
 import { Vehicle } from '@/types/vehicle';
 import Button from '@/components/ui/Button';
 import { media } from '@/styles/theme';
+import { RootState } from '@/store';
 
 interface VehicleListItemProps {
   vehicle: Vehicle;
+  style?: React.CSSProperties;
 }
 
-const ListItemWrapper = styled.div`
+const ListItemWrapper = styled.div<{ style?: React.CSSProperties }>`
   display: flex;
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   padding: ${({ theme }) => theme.spacing.md};
-  background-color: white;
+  background-color: ${({ theme }) => theme.colors.background};
   box-shadow: ${({ theme }) => theme.shadows.sm};
   transition: box-shadow 0.2s ease-in-out;
   gap: ${({ theme }) => theme.spacing.md};
-  align-items: flex-start; // Align items to the top
+  align-items: flex-start;
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+  overflow: hidden;
+
+  ${({ style }) => style && `
+    position: ${style.position};
+    top: ${style.top};
+    left: ${style.left};
+    width: ${style.width};
+    height: ${style.height};
+  `}
 
   &:hover {
     box-shadow: ${({ theme }) => theme.shadows.md};
   }
 
-  ${media.down('sm')} { // Stack vertically on small screens
+  ${media.down('sm')} {
     flex-direction: column;
     align-items: stretch;
   }
 `;
 
 const ImageContainer = styled.div`
-  flex-shrink: 0; // Prevent image from shrinking
-  width: 120px; // Fixed width for list image
-  height: 90px;  // Fixed height
+  flex-shrink: 0;
+  width: 120px;
+  height: 90px;
   ${media.down('sm')} {
-    width: 100%; // Full width on small screens
-    height: 180px; // Taller image when stacked
+    width: 100%;
+    height: 180px;
     margin-bottom: ${({ theme }) => theme.spacing.md};
   }
 `;
@@ -51,7 +63,7 @@ const ListItemImage = styled.img`
 `;
 
 const ContentContainer = styled.div`
-  flex-grow: 1; // Takes up remaining space
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
 `;
@@ -65,7 +77,7 @@ const Title = styled.h3`
 
 const DetailsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); // Responsive columns for details
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.md};
   font-size: ${({ theme }) => theme.typography.fontSize.sm};
   color: ${({ theme }) => theme.colors.text};
@@ -78,18 +90,18 @@ const DetailItem = styled.span`
 
 const ActionsContainer = styled.div`
   display: flex;
-  flex-direction: column; // Stack price/time and button vertically
-  align-items: flex-end; // Align to the right
+  flex-direction: column;
+  align-items: flex-end;
   gap: ${({ theme }) => theme.spacing.sm};
-  margin-left: auto; // Push to the far right
+  margin-left: auto;
   padding-left: ${({ theme }) => theme.spacing.md};
 
-  ${media.down('sm')} { // Align differently on small screens
-     margin-left: 0;
-     margin-top: ${({ theme }) => theme.spacing.md};
-     flex-direction: row;
-     justify-content: space-between;
-     width: 100%;
+  ${media.down('sm')} {
+    margin-left: 0;
+    margin-top: ${({ theme }) => theme.spacing.md};
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
   }
 `;
 
@@ -107,9 +119,9 @@ const AuctionTime = styled.div`
   text-align: right;
 `;
 
-const VehicleListItem: React.FC<VehicleListItemProps> = ({ vehicle }) => {
+const VehicleListItem: React.FC<VehicleListItemProps> = ({ vehicle, style }) => {
   const dispatch = useDispatch();
-  const favorites = useSelector(selectFavorites);
+  const favorites = useSelector((state: RootState) => selectFavorites(state));
   const isFavorite = favorites.includes(vehicle.id);
 
   const handleToggleFavorite = () => {
@@ -123,9 +135,9 @@ const VehicleListItem: React.FC<VehicleListItemProps> = ({ vehicle }) => {
   const imageUrl = `/images/placeholder.jpg`;
 
   return (
-    <ListItemWrapper>
+    <ListItemWrapper style={style}>
       <ImageContainer>
-        <ListItemImage src={imageUrl} alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} />
+        <ListItemImage src={vehicle.details.specification.imageUrl || '/images/placeholder.jpg'} alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} />
       </ImageContainer>
 
       <ContentContainer>
@@ -142,17 +154,17 @@ const VehicleListItem: React.FC<VehicleListItemProps> = ({ vehicle }) => {
       </ContentContainer>
 
       <ActionsContainer>
-          <div>
-            <Price>Bid: ${vehicle.startingBid?.toLocaleString() || 'N/A'}</Price>
-            <AuctionTime>Auction: {new Date(vehicle.auctionDateTime).toLocaleString() || 'N/A'}</AuctionTime>
-          </div>
-          <Button
-            variant={isFavorite ? 'secondary' : 'outline'}
-            size="sm"
-            onClick={handleToggleFavorite}
-          >
-            {isFavorite ? 'Unfav' : 'Fav'} ⭐ {/* Shorter text */}
-          </Button>
+        <div>
+          <Price>Bid: ${vehicle.startingBid?.toLocaleString() || 'N/A'}</Price>
+          <AuctionTime>Auction: {new Date(vehicle.auctionDateTime).toLocaleString() || 'N/A'}</AuctionTime>
+        </div>
+        <Button
+          variant={isFavorite ? 'secondary' : 'outline'}
+          size="sm"
+          onClick={handleToggleFavorite}
+        >
+          {isFavorite ? 'Unfav' : 'Fav'} ⭐
+        </Button>
       </ActionsContainer>
     </ListItemWrapper>
   );
