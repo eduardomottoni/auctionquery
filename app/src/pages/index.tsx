@@ -7,7 +7,6 @@ import {
   selectAllVehicles,
   selectVehiclesStatus,
 } from '@/store/vehiclesSlice';
-import AuthStatus from '@/components/AuthStatus'; // Import the status component
 
 const StyledHeading = styled.h1`
   color: ${({ theme }) => theme.colors.primary};
@@ -47,7 +46,6 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Container>
-        <AuthStatus /> {/* Add the status component here */}
         <StyledHeading>Welcome to the Auction!</StyledHeading>
         <InfoText>
           Redux store configured.

@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import withAuth from '@/components/withAuth';
 import { useAuth } from '@/hooks/useAuth';
-import AuthStatus from '@/components/AuthStatus';
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.lg};
@@ -19,7 +18,6 @@ const ProtectedPageContent: React.FC = () => {
 
   return (
     <Container>
-      <AuthStatus />
       <Title>Protected Page</Title>
       <p>If you can see this, you are logged in!</p>
       <p>Welcome, {user?.name || 'User'}!</p>

@@ -9,6 +9,7 @@ import { setInitialLastSearch } from '@/store/searchSlice';
 import { setInitialAuthState } from '@/store/authSlice';
 import theme from '@/styles/theme';
 import GlobalStyles from '@/styles/GlobalStyles';
+import Layout from "@/components/Layout";
 // import { Auth0Provider } from '@auth0/nextjs-auth0'; // Renamed from UserProvider in v4, not required by default
 
 function App({ Component, pageProps }: AppProps) {
@@ -32,9 +33,11 @@ function App({ Component, pageProps }: AppProps) {
     <ReduxProvider store={store}>
       <ThemeProvider theme={theme}>
         <GlobalStyles />
-        {/* <Auth0Provider> */}
-          <Component {...pageProps} />
-        {/* </Auth0Provider> */}
+        <Layout>
+          {/* <Auth0Provider> */}
+            <Component {...pageProps} />
+          {/* </Auth0Provider> */}
+        </Layout>
       </ThemeProvider>
     </ReduxProvider>
   );
