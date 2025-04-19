@@ -3,7 +3,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Modal from './Modal';
 import { ThemeProvider } from 'styled-components';
-import theme from '@/styles/theme'; // Import your theme
+import { lightTheme as theme } from '@/styles/theme'; // Use a specific theme
 
 // Helper function to render with providers
 const renderWithTheme = (ui: React.ReactElement) => {

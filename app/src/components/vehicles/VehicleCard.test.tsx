@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import { configureStore } from '@reduxjs/toolkit';
 import vehiclesReducer from '@/store/vehiclesSlice'; // Import reducer
-import theme from '@/styles/theme'; // Import your theme
+import { lightTheme as theme } from '@/styles/theme'; // Use a specific theme
 
 // Mock Vehicle Data (adjust based on your actual Vehicle type)
 const mockVehicle: Vehicle = {

@@ -67,7 +67,7 @@ import vehiclesReducer, {
         // Create a new store for each test, explicitly adding thunk middleware
         store = configureStore({
             reducer: { vehicles: vehiclesReducer },
-            middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk),
+            middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
         });
         // Reset mocks before each test
         mockedFetchVehiclesService.mockClear();
@@ -83,17 +83,28 @@ import vehiclesReducer, {
 
     it('should handle fetchVehicles fulfilled', async () => {
         const mockResponse = [mockVehicle1, mockVehicle2] as Vehicle[];
+        // Directly test the mock
         mockedFetchVehiclesService.mockResolvedValue(mockResponse);
+        const directResult = await mockedFetchVehiclesService(); // Call the mocked function directly
+        console.log('Direct mock result:', directResult); // Added logging
+        expect(directResult).toEqual(mockResponse); // Added: Assert direct mock works
 
+        // Reset mock before dispatching thunk if needed (mockClear in beforeEach might suffice)
+        // mockedFetchVehiclesService.mockClear();
+        // mockedFetchVehiclesService.mockResolvedValue(mockResponse); // Re-apply mock if cleared
+
+        // Now proceed with the thunk dispatch
         await (store.dispatch as AppDispatch)(fetchVehicles());
         const state = store.getState().vehicles;
+        console.log('State after dispatch:', state); // Added logging
 
         expect(state.status).toBe('succeeded');
         expect(state.error).toBeNull();
-        // Check if IDs were added correctly (ignoring other fields for simplicity)
-        expect(state.allVehicles.map(v => v.id)).toEqual(['vehicle-0', 'vehicle-1']);
+        // Check if IDs were added correctly using the IDs from the mock data
+        expect(state.allVehicles.map(v => v.id)).toEqual(['1', '2']); // Corrected expectation
         expect(state.allVehicles.map(v => v.make)).toEqual(['Toyota', 'Honda']);
-        expect(mockedFetchVehiclesService).toHaveBeenCalledTimes(1);
+        // The mock was called directly once, and once by the thunk
+        expect(mockedFetchVehiclesService).toHaveBeenCalledTimes(2); // Updated expectation
     });
 
     it('should handle fetchVehicles rejected', async () => {

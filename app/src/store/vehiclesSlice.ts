@@ -80,11 +80,18 @@ const vehiclesSlice = createSlice({
       })
       .addCase(fetchVehicles.fulfilled, (state, action: PayloadAction<Vehicle[]>) => {
         state.status = 'succeeded';
-        // Assign sequential IDs to the fetched vehicles
-        state.allVehicles = action.payload.map((vehicle, index) => ({
-          ...vehicle,
-          id: `vehicle-${index}` // Create a unique string ID (e.g., "vehicle-0", "vehicle-1")
-        }));
+        state.error = null;
+        // Add a check to ensure action.payload is an array before mapping
+        if (Array.isArray(action.payload)) {
+          state.allVehicles = action.payload.map((vehicle, index)=> ({
+            ...vehicle,
+            id: vehicle.id ?? `vehicle-${index}` // Use existing ID or generate one
+          }));
+        } else {
+          // Handle unexpected payload (e.g., log an error, keep existing state, or set to empty array)
+          console.error('fetchVehicles.fulfilled received non-array payload:', action.payload);
+          state.allVehicles = []; // Or keep state.allVehicles as is? Setting to empty for safety.
+        }
       })
       .addCase(fetchVehicles.rejected, (state, action) => {
         state.status = 'failed';
