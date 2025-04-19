@@ -13,6 +13,7 @@ import vehiclesReducer, {
   import { VehiclesState } from './vehiclesSlice'; // Import the state type
   import type { ThunkDispatch, UnknownAction } from '@reduxjs/toolkit';
   import type { RootState } from './index'; // Assuming your root state definition is in store/index.ts
+  import { unwrapResult } from '@reduxjs/toolkit'; // Import unwrapResult
 
   // Mock the vehicle service
   jest.mock('@/services/vehicleService');
@@ -86,17 +87,23 @@ import vehiclesReducer, {
         // Directly test the mock
         mockedFetchVehiclesService.mockResolvedValue(mockResponse);
         const directResult = await mockedFetchVehiclesService(); // Call the mocked function directly
-        console.log('Direct mock result:', directResult); // Added logging
-        expect(directResult).toEqual(mockResponse); // Added: Assert direct mock works
+        console.log('Direct mock result:', directResult); // Keep logging for now
+        expect(directResult).toEqual(mockResponse);
 
-        // Reset mock before dispatching thunk if needed (mockClear in beforeEach might suffice)
-        // mockedFetchVehiclesService.mockClear();
-        // mockedFetchVehiclesService.mockResolvedValue(mockResponse); // Re-apply mock if cleared
+        // Use unwrapResult to ensure thunk promise is fully settled
+        const action = await store.dispatch(fetchVehicles());
+        try {
+            const result = unwrapResult(action);
+            console.log('Unwrapped thunk result:', result); // Log the actual result seen by reducer
+            // Optionally assert on the result if needed, though we mainly care about state
+        } catch (error) {
+            console.error('Thunk failed unexpectedly in test:', error);
+            // Fail the test if the thunk rejected when it shouldn't have
+            throw error;
+        }
 
-        // Now proceed with the thunk dispatch
-        await (store.dispatch as AppDispatch)(fetchVehicles());
         const state = store.getState().vehicles;
-        console.log('State after dispatch:', state); // Added logging
+        console.log('State after dispatch and unwrap:', state); // Updated logging
 
         expect(state.status).toBe('succeeded');
         expect(state.error).toBeNull();
@@ -104,7 +111,7 @@ import vehiclesReducer, {
         expect(state.allVehicles.map(v => v.id)).toEqual(['1', '2']); // Corrected expectation
         expect(state.allVehicles.map(v => v.make)).toEqual(['Toyota', 'Honda']);
         // The mock was called directly once, and once by the thunk
-        expect(mockedFetchVehiclesService).toHaveBeenCalledTimes(2); // Updated expectation
+        expect(mockedFetchVehiclesService).toHaveBeenCalledTimes(2);
     });
 
     it('should handle fetchVehicles rejected', async () => {

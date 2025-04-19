@@ -12,11 +12,10 @@ const renderWithTheme = (ui: React.ReactElement) => {
 describe('<Footer />', () => {
   it('renders copyright information', () => {
     renderWithTheme(<Footer />);
-    // Check for text containing the current year and company name/relevant text
-    // Using a regex to be flexible with spacing and exact wording
+    // Update regex to match the actual text
     const currentYear = new Date().getFullYear();
-    expect(screen.getByText(new RegExp(`© ${currentYear}.*Constellation \(Sandbox\)`, 'i'))).toBeInTheDocument();
-    // Add more specific checks if needed, e.g., for links
+    expect(screen.getByText(new RegExp(`© ${currentYear}.*Constellation Auction`, 'i'))).toBeInTheDocument();
+    expect(screen.getByText(/All rights reserved/i)).toBeInTheDocument();
   });
 
   // Add more tests if Footer has links or other interactive elements
