@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from '@/store';
 import { addFavorite, removeFavorite, selectFavorites } from '@/store/vehiclesSlice';
@@ -7,7 +7,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import VehicleDetails from './VehicleDetails';
-import { format } from 'date-fns';
+import { format, differenceInDays, differenceInHours, isPast } from 'date-fns';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -63,8 +63,29 @@ const CardActions = styled.div`
 
 const AuctionTime = styled.span`
     font-size: ${({ theme }) => theme.typography.fontSize.xs};
-    color: ${({ theme }) => theme.colors.secondary};
     font-style: italic;
+    display: flex;
+    align-items: center;
+`;
+
+const TrafficLight = styled.div`
+    display: inline-block;
+    margin-right: ${({ theme }) => theme.spacing.xs};
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: ${(props) => props.color};
+`;
+
+interface CountdownTextProps {
+    color: string;
+    bold?: boolean;
+}
+
+const CountdownText = styled.span<CountdownTextProps>`
+    color: ${(props) => props.color};
+    font-size: ${({ theme }) => theme.typography.fontSize.md};
+    font-weight: ${(props) => props.bold ? 'bold' : 'normal'};
 `;
 
 const formatDateShort = (dateString: string | undefined): string => {
@@ -76,12 +97,43 @@ const formatDateShort = (dateString: string | undefined): string => {
   }
 };
 
+const getAuctionStatus = (auctionDateTime: string | undefined) => {
+  if (!auctionDateTime) return { days: 0, hours: 0, isStarted: false, isCloseToStart: false };
+  
+  try {
+    const auctionDate = new Date(auctionDateTime);
+    const now = new Date();
+    
+    if (isPast(auctionDate)) {
+      return { days: 0, hours: 0, isStarted: true, isCloseToStart: false };
+    }
+    
+    const days = differenceInDays(auctionDate, now);
+    const hours = differenceInHours(auctionDate, now) % 24;
+    const isCloseToStart = days < 7;
+    
+    return { days, hours, isStarted: false, isCloseToStart };
+  } catch {
+    return { days: 0, hours: 0, isStarted: false, isCloseToStart: false };
+  }
+};
+
 const VehicleCard: React.FC<VehicleCardProps> = React.memo(({ vehicle }) => {
   const dispatch = useDispatch();
   const favorites = useSelector(selectFavorites);
   // Use Redux state for favorite status, ignore vehicle.favourite from data source
   const isFavorite = favorites.includes(vehicle.id);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [auctionStatus, setAuctionStatus] = useState(getAuctionStatus(vehicle.auctionDateTime));
+
+  useEffect(() => {
+    // Update the countdown every hour
+    const interval = setInterval(() => {
+      setAuctionStatus(getAuctionStatus(vehicle.auctionDateTime));
+    }, 3600000); // 1 hour in milliseconds
+    
+    return () => clearInterval(interval);
+  }, [vehicle.auctionDateTime]);
 
   const handleToggleFavorite = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -103,6 +155,23 @@ const VehicleCard: React.FC<VehicleCardProps> = React.memo(({ vehicle }) => {
   // Use the specific placeholder image path
   const imageUrl = `/images/placeholder.jpg`;
 
+  // Determine traffic light color and message based on auction status
+  let trafficLightColor = '#FF0000'; // Red by default (3+ days)
+  let countdownColor = '#FF0000';
+  let countdownMessage = '';
+  
+  if (auctionStatus.isStarted) {
+    trafficLightColor = '#00FF00'; // Green
+    countdownColor = '#00FF00';
+    countdownMessage = 'Already Open';
+  } else if (auctionStatus.isCloseToStart) {
+    trafficLightColor = '#FFFF00'; // Yellow
+    countdownColor = '#FFFF00';
+    countdownMessage = `${auctionStatus.days}d ${auctionStatus.hours}h - Opening Soon!`;
+  } else {
+    countdownMessage = `${auctionStatus.days}d ${auctionStatus.hours}h until start`;
+  }
+
   return (
     <>
       <StyledCard onClick={handleCardClick}>
@@ -120,7 +189,10 @@ const VehicleCard: React.FC<VehicleCardProps> = React.memo(({ vehicle }) => {
         </CardContent>
         <CardActions>
           <AuctionTime>
-            Auction: {formatDateShort(vehicle.auctionDateTime)}
+            <TrafficLight color={trafficLightColor} />
+            <CountdownText color={countdownColor} bold={auctionStatus.isStarted || auctionStatus.isCloseToStart}>
+              {countdownMessage}
+            </CountdownText>
           </AuctionTime>
           <Button
             variant={isFavorite ? 'secondary' : 'outline'}

@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 
 interface PaginationProps {
   currentPage: number;
@@ -6,6 +7,51 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
   totalItems: number;
 }
+
+const PaginationContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+`;
+
+const PageInfo = styled.div`
+  @media (max-width: 640px) {
+    display: none;
+  }
+`;
+
+const PageControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const PageButton = styled.button<{ active?: boolean }>`
+  padding: 6px 12px;
+  border: 1px solid ${({ active, theme }) => active ? theme.colors.primary : theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  background-color: ${({ active, theme }) => active ? theme.colors.primary : 'transparent'};
+  color: ${({ active, theme }) => active ? theme.colors.buttonPrimaryText : theme.colors.text};
+  font-weight: ${({ active }) => active ? 'bold' : 'normal'};
+  cursor: pointer;
+  
+  &:hover {
+    background-color: ${({ active, theme }) => active ? theme.colors.primary : theme.colors.background};
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const PageEllipsis = styled.span`
+  padding: 6px 12px;
+  color: ${({ theme }) => theme.colors.text};
+`;
 
 const Pagination: React.FC<PaginationProps> = React.memo(({
   currentPage,
@@ -25,42 +71,99 @@ const Pagination: React.FC<PaginationProps> = React.memo(({
     }
   };
 
-  // Basic pagination logic (can be enhanced with page number links)
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    
+    // Always show page 1
+    pageNumbers.push(1);
+    
+    // Calculate range of visible pages (2 before and 2 after current)
+    let startPage = Math.max(2, currentPage - 2);
+    let endPage = Math.min(totalPages - 1, currentPage + 2);
+    
+    // If we're at the start, show more pages after
+    if (currentPage < 4) {
+      endPage = Math.min(totalPages - 1, 5);
+    }
+    
+    // If we're at the end, show more pages before
+    if (currentPage > totalPages - 3) {
+      startPage = Math.max(2, totalPages - 4);
+    }
+    
+    // Add ellipsis after page 1 if needed
+    if (startPage > 2) {
+      pageNumbers.push('ellipsis1');
+    }
+    
+    // Add pages in the middle
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+    
+    // Add ellipsis before last page if needed
+    if (endPage < totalPages - 1) {
+      pageNumbers.push('ellipsis2');
+    }
+    
+    // Always show last page if there is more than one page
+    if (totalPages > 1) {
+      pageNumbers.push(totalPages);
+    }
+    
+    return pageNumbers;
+  };
+
+  if (totalPages <= 1) return null;
+
   return (
-    <div className="flex items-center justify-between flex-wrap gap-y-2 mt-4">
-      <div className="hidden sm:block">
-        <span className="text-sm text-gray-700">
+    <PaginationContainer>
+      <PageInfo>
+        <span>
           Showing{' '}
-          <span className="font-semibold text-gray-900">
+          <strong>
             {totalItems === 0 ? 0 : (currentPage - 1) * 10 + 1}
-          </span>{' '}
+          </strong>{' '}
           to{' '}
-          <span className="font-semibold text-gray-900">
+          <strong>
             {Math.min(currentPage * 10, totalItems)}
-          </span>{' '}
-          of <span className="font-semibold text-gray-900">{totalItems}</span> Results
+          </strong>{' '}
+          of <strong>{totalItems}</strong> Results
         </span>
-      </div>
-      <div className="flex items-center space-x-2">
-        <button
-          onClick={handlePrevious}
+      </PageInfo>
+      <PageControls>
+        <PageButton 
+          onClick={handlePrevious} 
           disabled={currentPage === 1}
-          className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 hover:bg-gray-100"
         >
           Previous
-        </button>
-        <span className="text-sm text-gray-700 font-medium">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={handleNext}
+        </PageButton>
+        
+        {getPageNumbers().map((page, index) => {
+          if (page === 'ellipsis1' || page === 'ellipsis2') {
+            return <PageEllipsis key={`${page}`}>...</PageEllipsis>;
+          }
+          
+          return (
+            <PageButton
+              key={`page-${page}`}
+              active={currentPage === page}
+              onClick={() => onPageChange(page as number)}
+            >
+              {page}
+            </PageButton>
+          );
+        })}
+        
+        <PageButton 
+          onClick={handleNext} 
           disabled={currentPage === totalPages || totalPages === 0}
-          className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 hover:bg-gray-100"
         >
           Next
-        </button>
-      </div>
-    </div>
+        </PageButton>
+      </PageControls>
+    </PaginationContainer>
   );
 });
 

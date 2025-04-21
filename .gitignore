@@ -83,3 +83,4 @@ out/
 Thumbs.db 
 journal.txt
 app/output.md
+.vercel
