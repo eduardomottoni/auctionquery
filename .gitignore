@@ -82,3 +82,4 @@ out/
 # Windows thumbnail cache files
 Thumbs.db 
 journal.txt
+app/output.md

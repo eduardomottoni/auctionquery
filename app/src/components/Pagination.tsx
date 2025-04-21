@@ -64,4 +64,6 @@ const Pagination: React.FC<PaginationProps> = React.memo(({
   );
 });
 
+Pagination.displayName = 'Pagination';
+
 export default Pagination; 

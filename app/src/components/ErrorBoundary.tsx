@@ -38,7 +38,7 @@ class ErrorBoundary extends Component<Props, State> {
     hasError: false
   };
 
-  public static getDerivedStateFromError(_: Error): State {
+  public static getDerivedStateFromError(/* Error */): State {
     // Update state so the next render will show the fallback UI.
     return { hasError: true };
   }

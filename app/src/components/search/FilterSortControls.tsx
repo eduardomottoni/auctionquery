@@ -23,11 +23,11 @@ const StyledForm = styled(Form)`
   gap: ${({ theme }) => theme.spacing.md};
   align-items: flex-end;
 
-  ${({ theme }) => media.down('sm')} { // Target small screens
+  ${media.down('sm')} { // Target small screens
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); // Allow slightly smaller columns
   }
 
-  ${({ theme }) => media.down('xs')} { // Target extra-small screens (adjust breakpoint if needed)
+  ${media.down('xs')} { // Target extra-small screens (adjust breakpoint if needed)
       grid-template-columns: 1fr; // Stack everything into one column
   }
 `;
@@ -81,7 +81,7 @@ const ButtonGroup = styled.div`
     gap: ${({ theme }) => theme.spacing.md};
     margin-top: ${({ theme }) => theme.spacing.md};
 
-    ${({ theme }) => media.down('xs')} { // Stack buttons on extra-small screens
+    ${media.down('xs')} { // Stack buttons on extra-small screens
         flex-direction: column;
         align-items: stretch;
         justify-content: center;
@@ -166,7 +166,7 @@ const FilterSortControls: React.FC = () => {
         }}
         enableReinitialize // Re-initialize form if Redux state changes externally
       >
-        {({ isSubmitting, handleReset }) => (
+        {({ isSubmitting }) => (
           <StyledForm>
             <FormGroup>
               <Label htmlFor="make">Make</Label>
