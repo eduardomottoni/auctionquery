@@ -79,13 +79,13 @@ const TrafficLight = styled.div`
 
 interface CountdownTextProps {
     color: string;
-    bold?: boolean;
+    $bold?: boolean;
 }
 
 const CountdownText = styled.span<CountdownTextProps>`
     color: ${(props) => props.color};
     font-size: ${({ theme }) => theme.typography.fontSize.md};
-    font-weight: ${(props) => props.bold ? 'bold' : 'normal'};
+    font-weight: ${(props) => props.$bold ? 'bold' : 'normal'};
 `;
 
 const formatDateShort = (dateString: string | undefined): string => {
@@ -190,7 +190,7 @@ const VehicleCard: React.FC<VehicleCardProps> = React.memo(({ vehicle }) => {
         <CardActions>
           <AuctionTime>
             <TrafficLight color={trafficLightColor} />
-            <CountdownText color={countdownColor} bold={auctionStatus.isStarted || auctionStatus.isCloseToStart}>
+            <CountdownText color={countdownColor} $bold={auctionStatus.isStarted || auctionStatus.isCloseToStart}>
               {countdownMessage}
             </CountdownText>
           </AuctionTime>

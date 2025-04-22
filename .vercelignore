@@ -5,6 +5,11 @@ documentation/
 README.md
 LICENSE
 
-# Only deploy the app directory
+# Ignore everything except app directory and build files
 /*
-!/app 
+!/app
+!/package.json
+!/build.js
+!/vercel.json
+!/vercel-build.sh
+!/.vercelignore 

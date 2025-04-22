@@ -29,17 +29,17 @@ const PageControls = styled.div`
   gap: 8px;
 `;
 
-const PageButton = styled.button<{ active?: boolean }>`
+const PageButton = styled.button<{ $active?: boolean }>`
   padding: 6px 12px;
-  border: 1px solid ${({ active, theme }) => active ? theme.colors.primary : theme.colors.border};
+  border: 1px solid ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.border};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
-  background-color: ${({ active, theme }) => active ? theme.colors.primary : 'transparent'};
-  color: ${({ active, theme }) => active ? theme.colors.buttonPrimaryText : theme.colors.text};
-  font-weight: ${({ active }) => active ? 'bold' : 'normal'};
+  background-color: ${({ $active, theme }) => $active ? theme.colors.primary : 'transparent'};
+  color: ${({ $active, theme }) => $active ? theme.colors.buttonPrimaryText : theme.colors.text};
+  font-weight: ${({ $active }) => $active ? 'bold' : 'normal'};
   cursor: pointer;
   
   &:hover {
-    background-color: ${({ active, theme }) => active ? theme.colors.primary : theme.colors.background};
+    background-color: ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.background};
   }
   
   &:disabled {
@@ -158,7 +158,7 @@ const Pagination: React.FC<PaginationProps> = React.memo(({
           return (
             <PageButton
               key={`page-${page}`}
-              active={currentPage === page}
+              $active={currentPage === page}
               onClick={() => onPageChange(page as number)}
             >
               {page}

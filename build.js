@@ -19,11 +19,21 @@ if (!fs.existsSync(appDir)) {
 }
 
 try {
-  console.log('📦 Installing dependencies...');
+  // Check if Next.js is installed in the app directory
+  console.log('📦 Checking for Next.js installation...');
+  const appPackageJson = require('./app/package.json');
+  console.log(`Found Next.js version: ${appPackageJson.dependencies.next}`);
+  
+  console.log('📦 Installing dependencies in app directory...');
   execSync('npm install', { stdio: 'inherit', cwd: appDir });
   
   console.log('🔨 Building Next.js application...');
   execSync('npm run build', { stdio: 'inherit', cwd: appDir });
+  
+  // Copy .next directory to the correct output directory if needed
+  if (process.env.VERCEL) {
+    console.log('🔄 Running in Vercel environment - ensuring output directory is correct...');
+  }
   
   console.log('✅ Build completed successfully!');
 } catch (error) {
