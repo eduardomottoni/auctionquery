@@ -92,26 +92,28 @@ This project includes a GitHub Actions workflow that automatically builds and te
 
 ### Automatic Deployment from GitHub
 
-This project is configured for automatic deployment to Vercel when you push to your GitHub repository. To set it up:
+This project is configured for automatic deployment to Vercel when you push to your GitHub repository. The root `vercel.json` is configured to build the Next.js app in the `app` directory correctly.
+
+To set up the deployment:
 
 1. Connect your GitHub repository to Vercel:
    - Go to [Vercel](https://vercel.com) and sign in
    - Click "Add New" > "Project"
    - Select your GitHub repository
-   - Vercel will detect the Next.js app in the `app` directory thanks to the `vercel.json` configuration
+   - In the project settings, ensure "Root Directory" is set to `/` (not `/app`)
+   - Vercel will use the vercel.json in the root to find the Next.js app
 
-2. Set up the required GitHub secrets for the GitHub Actions workflow:
+2. For GitHub Actions deployment (optional), set up the required secrets:
    - `VERCEL_TOKEN`: Your Vercel API token
    - `VERCEL_ORG_ID`: Your Vercel Organization ID
    - `VERCEL_PROJECT_ID`: Your Vercel Project ID
 
-   You can find these values in your Vercel project settings or by running:
+   You can run the setup script to help configure these values:
    ```bash
-   npx vercel login
-   npx vercel link
+   npm run vercel:setup
    ```
 
-3. Push to your main/master branch, and GitHub Actions will automatically build and deploy your project to Vercel
+3. Push to your main/master branch, and the project will automatically deploy
 
 ### Manual Deployment
 

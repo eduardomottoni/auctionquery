@@ -6,4 +6,5 @@ README.md
 LICENSE
 
 # Only deploy the app directory
-!app/ 
+/*
+!/app 
