@@ -30,15 +30,30 @@ const nextConfig = {
   // Output standalone build for improved compatibility
   output: 'standalone',
   
-  // Configuração para permitir o uso dos dois tipos de rotas (app/ e pages/)
+  // Configuração para permitir o uso dos dois tipos de rotas
   experimental: {
-    appDir: true,  // Permite uso do app directory
+    // appDir não é mais usado no Next.js 15.3.1, foi substituído por serverActions
+    serverActions: true,
   },
   
   // Configuração específica para Vercel
   generateBuildId: async () => {
     // Você pode usar este ID para garantir que o build seja único
     return `build-${new Date().getTime()}`;
+  },
+
+  // Adicionar rewrite para direcionar / para a página principal da aplicação
+  async rewrites() {
+    return [
+      {
+        source: '/',
+        destination: '/src/pages/index',
+      },
+      {
+        source: '/:path*',
+        destination: '/src/pages/:path*',
+      }
+    ];
   }
 };
 
