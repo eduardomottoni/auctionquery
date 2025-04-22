@@ -29,6 +29,17 @@ const nextConfig = {
   
   // Output standalone build for improved compatibility
   output: 'standalone',
+  
+  // Configuração para permitir o uso dos dois tipos de rotas (app/ e pages/)
+  experimental: {
+    appDir: true,  // Permite uso do app directory
+  },
+  
+  // Configuração específica para Vercel
+  generateBuildId: async () => {
+    // Você pode usar este ID para garantir que o build seja único
+    return `build-${new Date().getTime()}`;
+  }
 };
 
 module.exports = nextConfig; 

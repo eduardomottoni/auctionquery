@@ -11,4 +11,5 @@ LICENSE
 !/package.json
 !/build.js
 !/vercel.json
-!/vercel-build.sh 
+!/vercel-build.sh
+!/.vercelignore 
