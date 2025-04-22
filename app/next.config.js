@@ -23,6 +23,12 @@ const nextConfig = {
     // Return the modified config
     return config;
   },
+  
+  // Ensure correct output path for Vercel deployment
+  distDir: process.env.VERCEL ? '.next' : '.next',
+  
+  // Output standalone build for improved compatibility
+  output: 'standalone',
 };
 
 module.exports = nextConfig; 
