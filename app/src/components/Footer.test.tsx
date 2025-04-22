@@ -14,7 +14,7 @@ describe('<Footer />', () => {
     renderWithTheme(<Footer />);
     // Update regex to match the actual text
     const currentYear = new Date().getFullYear();
-    expect(screen.getByText(new RegExp(`© ${currentYear}.*Constellation Auction`, 'i'))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`© ${currentYear}.*Vehicle Auction`, 'i'))).toBeInTheDocument();
     expect(screen.getByText(/All rights reserved/i)).toBeInTheDocument();
   });
 

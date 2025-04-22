@@ -117,7 +117,7 @@ function HomePageContent() {
   return (
     <>
       <Head>
-        <title>Constellation Auction - Home</title>
+        <title>Vehicle Auction - Home</title>
         <meta name="description" content="Vehicle Auction Platform Listings" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

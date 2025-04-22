@@ -4,6 +4,7 @@ import * as Yup from 'yup';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from '@/store';
 import { setFilters, setSort, setLastSearch } from '@/store/searchSlice';
+import { toggleShowOnlyFavorites, selectShowOnlyFavorites } from '@/store/vehiclesSlice';
 import { RootState } from '@/store';
 import Button from '@/components/ui/Button';
 import { media } from '@/styles/theme';
@@ -88,6 +89,26 @@ const ButtonGroup = styled.div`
     }
 `;
 
+const CheckboxContainer = styled.div`
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  margin-top: ${({ theme }) => theme.spacing.sm};
+`;
+
+const CheckboxLabel = styled.label`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: ${({ theme }) => theme.typography.fontSize.md};
+  user-select: none;
+`;
+
+const StyledCheckbox = styled.input`
+  margin-right: ${({ theme }) => theme.spacing.sm};
+  cursor: pointer;
+`;
+
 // Validation Schema
 const FilterSchema = Yup.object().shape({
   make: Yup.string(),
@@ -120,6 +141,7 @@ const FilterSortControls: React.FC = () => {
   const dispatch = useDispatch();
   const currentFilters = useSelector((state: RootState) => state.search.filters);
   const currentSort = useSelector((state: RootState) => state.search.sort);
+  const showOnlyFavorites = useSelector(selectShowOnlyFavorites);
 
   // Combine field and direction into a single value for the select input
   const currentSortValue = currentSort ? `${currentSort.field}_${currentSort.direction}` : '';
@@ -134,6 +156,10 @@ const FilterSortControls: React.FC = () => {
     }
     // Save the search state whenever sort changes
     dispatch(setLastSearch());
+  };
+
+  const handleFavoritesToggle = () => {
+    dispatch(toggleShowOnlyFavorites());
   };
 
   return (
@@ -193,7 +219,7 @@ const FilterSortControls: React.FC = () => {
             </FormGroup>
 
             <FormGroup>
-                <Label htmlFor="sortControl" id="sortByLabel">Sort By</Label>
+                <Label htmlFor="sortControl">Sort By</Label>
                 {/* eslint-disable-next-line jsx-a11y/no-onchange -- Linter cannot link label correctly */}
                 <Select
                     id="sortControl"
@@ -201,8 +227,7 @@ const FilterSortControls: React.FC = () => {
                     as="select"
                     value={currentSortValue}
                     onChange={handleSortChange}
-                    aria-labelledby="sortByLabel"
-                    title="Sort vehicles by"
+                    aria-label="Sort vehicles by"
                 >
                     {sortOptions.map(option => (
                         <option key={option.value} value={option.value}>
@@ -211,6 +236,18 @@ const FilterSortControls: React.FC = () => {
                     ))}
                 </Select>
             </FormGroup>
+
+            <CheckboxContainer>
+              <CheckboxLabel htmlFor="showFavoritesOnly">
+                <StyledCheckbox
+                  type="checkbox"
+                  id="showFavoritesOnly"
+                  checked={showOnlyFavorites}
+                  onChange={handleFavoritesToggle}
+                />
+                Show only favorites
+              </CheckboxLabel>
+            </CheckboxContainer>
 
             <ButtonGroup>
                 {/* Reset button could potentially clear filters/sort and lastSearch in Redux */}

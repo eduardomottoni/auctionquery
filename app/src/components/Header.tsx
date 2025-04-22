@@ -9,8 +9,10 @@ import Button from '@/components/ui/Button'; // Import Button
 const StyledHeader = styled.header`
   background-color: ${({ theme }) => theme.colors.background};
   padding: ${({ theme }) => theme.spacing.md};
+  padding-bottom: ${({ theme }) => theme.spacing.lg}; // Increased bottom padding
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   box-shadow: ${({ theme }) => theme.shadows.sm};
+  margin-bottom: ${({ theme }) => theme.spacing.lg}; // Added margin-bottom for space
 `;
 
 const NavContainer = styled.nav`
@@ -156,7 +158,6 @@ const Header: React.FC = () => {
 
         <NavLinks>
           <NavLink href="/">Home</NavLink>
-          <NavLink href="/favorites">Favorites</NavLink>
           <NavLink href="/protected">Protected</NavLink>
           <NavLink href="/invalid-page">404 Test</NavLink>
           {/* Add other links here */}
@@ -189,7 +190,6 @@ const Header: React.FC = () => {
       <MobileMenuDrawer isOpen={isMobileMenuOpen} ref={menuRef}>
         {/* Add links - use onClick to close menu after navigation */}
         <NavLink href="/" onClick={closeMobileMenu}>Home</NavLink>
-        <NavLink href="/favorites" onClick={closeMobileMenu}>Favorites</NavLink>
         <NavLink href="/protected" onClick={closeMobileMenu}>Protected</NavLink>
         <NavLink href="/invalid-page" onClick={closeMobileMenu}>404 Test</NavLink>
         {/* Maybe add AuthStatus or Logout here too? */}

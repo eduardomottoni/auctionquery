@@ -165,8 +165,8 @@ const VehicleCard: React.FC<VehicleCardProps> = React.memo(({ vehicle }) => {
     countdownColor = '#00FF00';
     countdownMessage = 'Already Open';
   } else if (auctionStatus.isCloseToStart) {
-    trafficLightColor = '#FFFF00'; // Yellow
-    countdownColor = '#FFFF00';
+    trafficLightColor = '#FFA500'; // Amber/orange instead of yellow for better visibility
+    countdownColor = '#FFA500';
     countdownMessage = `${auctionStatus.days}d ${auctionStatus.hours}h - Opening Soon!`;
   } else {
     countdownMessage = `${auctionStatus.days}d ${auctionStatus.hours}h until start`;

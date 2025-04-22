@@ -14,6 +14,7 @@ import { Vehicle } from '@/types/vehicle'; // Import the central type definition
 export interface VehiclesState {
   allVehicles: Vehicle[];
   favorites: (number | string)[]; // Array of vehicle IDs
+  showOnlyFavorites: boolean; // Flag to show only favorites on the main page
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
@@ -24,6 +25,7 @@ export interface VehiclesState {
 const initialState: VehiclesState = {
   allVehicles: [],
   favorites: [], // Load initialFavorites here if doing it this way
+  showOnlyFavorites: false, // Default to showing all vehicles
   status: 'idle',
   error: null,
 };
@@ -70,6 +72,12 @@ const vehiclesSlice = createSlice({
     },
     setInitialFavorites: (state, action: PayloadAction<(number | string)[]>) => {
         state.favorites = action.payload;
+    },
+    toggleShowOnlyFavorites: (state) => {
+      state.showOnlyFavorites = !state.showOnlyFavorites;
+    },
+    setShowOnlyFavorites: (state, action: PayloadAction<boolean>) => {
+      state.showOnlyFavorites = action.payload;
     }
   },
   extraReducers: (builder) => {
@@ -106,7 +114,9 @@ export const {
   setVehiclesFailed,
   addFavorite,
   removeFavorite,
-  setInitialFavorites
+  setInitialFavorites,
+  toggleShowOnlyFavorites,
+  setShowOnlyFavorites
 } = vehiclesSlice.actions;
 
 // --- Selectors --- 
@@ -116,21 +126,35 @@ export const selectAllVehicles = (state: RootState): Vehicle[] => state.vehicles
 export const selectVehiclesStatus = (state: RootState) => state.vehicles.status;
 export const selectVehiclesError = (state: RootState) => state.vehicles.error;
 export const selectFavorites = (state: RootState) => state.vehicles.favorites;
+export const selectShowOnlyFavorites = (state: RootState) => state.vehicles.showOnlyFavorites;
 
 // Selectors from search slice needed for filtering/sorting/pagination
 const selectSearchFilters = (state: RootState) => state.search.filters;
 const selectSearchSort = (state: RootState) => state.search.sort;
 const selectSearchPagination = (state: RootState) => state.search.pagination;
 
-// Memoized selector for filtered vehicles
+// Enhanced selector that considers showOnlyFavorites flag
 export const selectFilteredVehicles = createSelector(
-  [selectAllVehicles, selectSearchFilters],
-  (vehicles: Vehicle[], filters): Vehicle[] => {
-    if (!vehicles || vehicles.length === 0) return [];
-    if (Object.keys(filters).length === 0) return vehicles;
+  [selectAllVehicles, selectFavorites, selectShowOnlyFavorites, selectSearchFilters],
+  (vehicles, favorites, showOnlyFavorites, searchParams) => {
+    let filteredVehicles = [...vehicles];
 
-    return vehicles.filter(vehicle => {
-      return Object.entries(filters).every(([key, value]) => {
+    // Filter by favorites if flag is set
+    if (showOnlyFavorites) {
+      filteredVehicles = filteredVehicles.filter(vehicle => favorites.includes(vehicle.id));
+    }
+
+    // Apply existing filters from search params
+    if (searchParams.make) {
+      filteredVehicles = filteredVehicles.filter(vehicle => 
+        vehicle.make?.toLowerCase() === searchParams.make?.toLowerCase()
+      );
+    }
+
+    if (Object.keys(searchParams).length === 0) return filteredVehicles;
+
+    return filteredVehicles.filter(vehicle => {
+      return Object.entries(searchParams).every(([key, value]) => {
         if (value === '' || value === null || value === undefined) return true;
 
         let vehicleValue: any;

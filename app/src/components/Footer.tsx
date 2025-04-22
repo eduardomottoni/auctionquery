@@ -15,7 +15,7 @@ const Footer: React.FC = () => {
 
   return (
     <StyledFooter>
-      &copy; {currentYear} Constellation Auction. All rights reserved.
+      &copy; {currentYear} Vehicle Auction. All rights reserved.
       {/* Add other footer links or info here */}
     </StyledFooter>
   );
