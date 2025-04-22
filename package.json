@@ -1,0 +1,20 @@
+{
+  "name": "constellation-auction-query",
+  "version": "1.0.0",
+  "description": "Root project for app deployment",
+  "private": true,
+  "scripts": {
+    "dev": "cd app && npm run dev",
+    "build": "cd app && npm run build",
+    "start": "cd app && npm run start",
+    "test": "cd app && npm test",
+    "lint": "cd app && npm run lint",
+    "webpack:dev": "cd app && npm run webpack:dev",
+    "webpack:build": "cd app && npm run webpack:build",
+    "install:app": "cd app && npm install",
+    "vercel:deploy": "vercel"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 
