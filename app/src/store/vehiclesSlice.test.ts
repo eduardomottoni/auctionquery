@@ -24,6 +24,7 @@ import vehiclesReducer, {
     const initialState: VehiclesState = {
       allVehicles: [],
       favorites: [],
+      showOnlyFavorites: false,
       status: 'idle',
       error: null,
     };

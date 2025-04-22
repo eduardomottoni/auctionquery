@@ -15,7 +15,7 @@ import searchReducer, {
   describe('search slice', () => {
     const initialState = {
       filters: {},
-      sort: null,
+      sort: { field: 'auctionDateTime', direction: 'desc' as const },
       pagination: {
         page: 1,
         limit: 25,
@@ -77,7 +77,7 @@ import searchReducer, {
         };
         const actual = searchReducer(currentState, resetSearch());
         expect(actual.filters).toEqual({});
-        expect(actual.sort).toBeNull();
+        expect(actual.sort).toEqual({ field: 'auctionDateTime', direction: 'desc' });
         expect(actual.pagination).toEqual({ page: 1, limit: 10 }); // Resets to defaults
     });
 

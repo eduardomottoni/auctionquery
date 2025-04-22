@@ -63,7 +63,11 @@ describe('<VehicleCard />', () => {
     expect(screen.getByText(/Colour: Blue/i)).toBeInTheDocument();
     expect(screen.getByText(/Mileage: 15[,.]000 miles/i)).toBeInTheDocument();
     expect(screen.getByText(/Starting Bid: [\$\£]?20[,.]000/i)).toBeInTheDocument();
-    expect(screen.getByText(/Auction:/i)).toBeInTheDocument();
+    // Remover este teste que busca por "Auction:" que não existe mais
+    // expect(screen.getByText(/Auction:/i)).toBeInTheDocument();
+    
+    // Verificar o status da auction
+    expect(screen.getByText(/Already Open|Opening Soon|\d+d \d+h until start/i)).toBeInTheDocument();
   });
 
   it('opens the details modal on click', async () => {
