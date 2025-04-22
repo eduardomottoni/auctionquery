@@ -118,7 +118,7 @@ const Pagination: React.FC<PaginationProps> = React.memo(({
   if (totalPages <= 1) return null;
 
   return (
-    <PaginationContainer>
+    <PaginationContainer data-testid="pagination">
       <PageInfo>
         <span>
           Showing{' '}
@@ -134,10 +134,20 @@ const Pagination: React.FC<PaginationProps> = React.memo(({
       </PageInfo>
       <PageControls>
         <PageButton 
+          onClick={() => onPageChange(1)}
+          disabled={currentPage === 1}
+          aria-label="Go to first page"
+        >
+          &laquo;
+        </PageButton>
+        
+        <PageButton 
           onClick={handlePrevious} 
           disabled={currentPage === 1}
+          aria-label="Go to previous page"
+          data-testid="prev-page"
         >
-          Previous
+          &lsaquo;
         </PageButton>
         
         {getPageNumbers().map((page, index) => {
@@ -159,8 +169,18 @@ const Pagination: React.FC<PaginationProps> = React.memo(({
         <PageButton 
           onClick={handleNext} 
           disabled={currentPage === totalPages || totalPages === 0}
+          aria-label="Go to next page"
+          data-testid="next-page"
         >
-          Next
+          &rsaquo;
+        </PageButton>
+        
+        <PageButton 
+          onClick={() => onPageChange(totalPages)}
+          disabled={currentPage === totalPages}
+          aria-label="Go to last page"
+        >
+          &raquo;
         </PageButton>
       </PageControls>
     </PaginationContainer>

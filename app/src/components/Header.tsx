@@ -39,6 +39,15 @@ const NavLinks = styled.div`
   }
 `;
 
+// Styled component para o AuthStatus que é escondido em telas pequenas
+const AuthStatusWrapper = styled.div`
+  flex-shrink: 1;
+  
+  ${media.down('sm')} { // Esconder em telas pequenas
+    display: none;
+  }
+`;
+
 const NavLink = styled(Link)`
   text-decoration: none;
   color: ${({ theme }) => theme.colors.text};
@@ -176,10 +185,15 @@ const Header: React.FC = () => {
             {themeMode === 'light' ? '🌙' : '☀️'} {/* Moon/Sun Icon */}
           </Button>
 
-          <div style={{ flexShrink: 1 }}> 
-              <AuthStatus />
-          </div>
-          <MobileMenuIcon onClick={toggleMobileMenu} ref={iconRef}>
+          <AuthStatusWrapper>
+            <AuthStatus />
+          </AuthStatusWrapper>
+          
+          <MobileMenuIcon 
+            onClick={toggleMobileMenu} 
+            ref={iconRef}
+            data-testid="mobile-menu-icon"
+          >
               {isMobileMenuOpen ? '✕' : '☰'} {/* Change icon when open */}
           </MobileMenuIcon>
         </div>
@@ -187,12 +201,19 @@ const Header: React.FC = () => {
 
       {/* Mobile Menu Implementation */}
       <MenuOverlay isOpen={isMobileMenuOpen} onClick={closeMobileMenu} />
-      <MobileMenuDrawer isOpen={isMobileMenuOpen} ref={menuRef}>
+      <MobileMenuDrawer 
+        isOpen={isMobileMenuOpen} 
+        ref={menuRef}
+        data-testid="mobile-menu"
+      >
         {/* Add links - use onClick to close menu after navigation */}
         <NavLink href="/" onClick={closeMobileMenu}>Home</NavLink>
         <NavLink href="/protected" onClick={closeMobileMenu}>Protected</NavLink>
         <NavLink href="/invalid-page" onClick={closeMobileMenu}>404 Test</NavLink>
-        {/* Maybe add AuthStatus or Logout here too? */}
+        {/* Adicionando AuthStatus no menu móvel para acesso em telas pequenas */}
+        <div style={{ marginTop: 'auto', padding: '16px 0' }}>
+          <AuthStatus />
+        </div>
       </MobileMenuDrawer>
     </StyledHeader>
   );

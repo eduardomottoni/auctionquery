@@ -33,9 +33,9 @@ const VehicleGrid: React.FC<VehicleGridProps> = ({ vehicles }) => {
   }
 
   return (
-    <GridContainer>
+    <GridContainer data-testid="vehicle-grid">
       {vehicles.map((vehicle) => (
-        <VehicleCard key={vehicle.id} vehicle={vehicle} />
+        <VehicleCard key={vehicle.id} vehicle={vehicle} data-testid="vehicle-card" />
       ))}
     </GridContainer>
   );

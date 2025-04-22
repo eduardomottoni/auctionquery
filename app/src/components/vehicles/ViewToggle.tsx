@@ -24,31 +24,39 @@ const ListButtonWrapper = styled.div`
   }
 `;
 
+const ToggleButton = styled.button<{ active: boolean }>`
+  background-color: ${({ theme, active }) => active ? theme.colors.primary : theme.colors.background};
+  color: ${({ theme, active }) => active ? theme.colors.textLight : theme.colors.text};
+  padding: ${({ theme }) => theme.spacing.sm};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  cursor: pointer;
+  
+  &:hover {
+    background-color: ${({ theme, active }) => active ? theme.colors.primary : theme.colors.border};
+  }
+`;
+
 const ViewToggle: React.FC<ViewToggleProps> = ({ currentView, onViewChange }) => {
   return (
-    <ToggleContainer>
-      <Button
-        variant={currentView === 'grid' ? 'primary' : 'ghost'}
-        size="sm"
-        onClick={() => onViewChange('grid')}
-        aria-label="Grid view"
-        aria-pressed={currentView === 'grid'}
+    <ToggleContainer data-testid="view-toggle">
+      <ToggleButton 
+        onClick={() => onViewChange('grid')} 
+        active={currentView === 'grid'}
+        data-testid="grid-icon"
+        aria-label="Grid View"
       >
-        {/* You can replace text with icons */}
         Grid
-      </Button>
-      {/* Wrap List button */}
+      </ToggleButton>
       <ListButtonWrapper>
-      <Button
-        variant={currentView === 'list' ? 'primary' : 'ghost'}
-        size="sm"
-        onClick={() => onViewChange('list')}
-        aria-label="List view"
-        aria-pressed={currentView === 'list'}
-      >
-        {/* You can replace text with icons */}
-        List
-      </Button>
+        <ToggleButton 
+          onClick={() => onViewChange('list')} 
+          active={currentView === 'list'}
+          data-testid="list-icon"
+          aria-label="List View"
+        >
+          List
+        </ToggleButton>
       </ListButtonWrapper>
     </ToggleContainer>
   );

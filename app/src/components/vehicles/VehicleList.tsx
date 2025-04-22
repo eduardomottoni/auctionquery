@@ -15,6 +15,12 @@ const ListContainer = styled.div`
   min-height: 400px; /* Ensure minimum height */
 `;
 
+const List = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.md};
+`;
+
 // Optional: If we wanted a different card style for list view, we could create VehicleListItem
 // and use that instead of VehicleCard here.
 
@@ -36,11 +42,11 @@ const VehicleList: React.FC<VehicleListProps> = ({ vehicles }) => {
       // paddingBottom: '10px',
       // boxSizing: 'border-box',
     };
-    return <VehicleListItem vehicle={vehicle} style={rowStyle} />;
+    return <VehicleListItem vehicle={vehicle} style={rowStyle} data-testid="vehicle-list-item" />;
   };
 
   return (
-    <ListContainer>
+    <ListContainer data-testid="vehicle-list">
       <AutoSizer>
         {({ height, width }) => (
           <FixedSizeList
