@@ -15,6 +15,9 @@
     "vercel:deploy": "vercel",
     "vercel:setup": "node setup-vercel.js"
   },
+  "dependencies": {
+    "next": "15.3.1"
+  },
   "engines": {
     "node": ">=18.0.0"
   }
